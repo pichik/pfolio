@@ -2,15 +2,12 @@ package collector
 
 import (
 	"net/url"
-	"text/template"
 
 	"github.com/pichik/webwatcher/src/auth"
 	"github.com/pichik/webwatcher/src/datacenter"
 	"github.com/pichik/webwatcher/src/misc"
 	"github.com/slack-go/slack"
 )
-
-var webhookTemplate *template.Template
 
 var slackClient *slack.Client
 
