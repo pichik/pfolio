@@ -20,7 +20,8 @@ func WebhookLoad() {
 }
 
 func webhookSend(data *datacenter.Data) {
-	if misc.Config.SlackChannel == "" || misc.Config.SlackToken == "" {
+	if misc.Config.SlackChannel == "" || misc.Config.SlackToken == "" || misc.Config.SlackToken == "slack-token" {
+		misc.DebugLog.Printf("No slack specified")
 		return
 	}
 
