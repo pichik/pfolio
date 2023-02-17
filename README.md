@@ -1,4 +1,4 @@
-# WebWatcher  
+# Web Watcher  
 Golang server for testing blind XSS.   
 Special endpoint for testing requests and file extensions.  
 
