@@ -11,7 +11,15 @@ go install github.com/pichik/webwatcher@latest // isthiscomment?
 ```
 sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
 ```
+<pre><code>```bash
+echo hi
+# This command does something
+$ some-command
 
+# This command does something else
+$ another-command
+```{.copy}
+</code></pre>
 3. Setup `.wwconfig` and add it to your home directory.  
 4. Make sure that `assets` and `templates` are in the directory specified in config.  
 
