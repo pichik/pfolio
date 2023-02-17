@@ -5,7 +5,7 @@ Special endpoint for testing requests and file extensions.
 ## Setup  
 1. Install  
 ```
-go install github.com/pichik/webwatcher@latest
+go install github.com/pichik/webwatcher@latest # isthiscomment?
 ```
 2. Set permissions for ports 
 ```
