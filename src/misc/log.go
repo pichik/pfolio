@@ -15,7 +15,6 @@ var DebugLog = log.New()
 
 func ImportLogs() {
 	os.MkdirAll(LogsDir, 0770)
-	err != nil
 
 	fh, err := os.OpenFile(LogsDir+"errors.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
 

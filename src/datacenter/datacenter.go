@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pichik/WebWatcher/src/misc"
+	"github.com/pichik/webwatcher/src/misc"
 )
 
 type Data struct {

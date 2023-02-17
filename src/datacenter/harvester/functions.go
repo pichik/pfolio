@@ -3,8 +3,8 @@ package harvester
 import (
 	"text/template"
 
-	"github.com/pichik/WebWatcher/src/datacenter"
-	"github.com/pichik/WebWatcher/src/misc"
+	"github.com/pichik/webwatcher/src/datacenter"
+	"github.com/pichik/webwatcher/src/misc"
 )
 
 var extractorTemplate *template.Template

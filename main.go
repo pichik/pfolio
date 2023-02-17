@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pichik/WebWatcher/src/auth"
-	"github.com/pichik/WebWatcher/src/datacenter"
-	"github.com/pichik/WebWatcher/src/datacenter/collector"
-	"github.com/pichik/WebWatcher/src/datacenter/harvester"
-	"github.com/pichik/WebWatcher/src/misc"
+	"github.com/pichik/webwatcher/src/auth"
+	"github.com/pichik/webwatcher/src/datacenter"
+	"github.com/pichik/webwatcher/src/datacenter/collector"
+	"github.com/pichik/webwatcher/src/datacenter/harvester"
+	"github.com/pichik/webwatcher/src/misc"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -67,7 +67,7 @@ func main() {
 	n.Use(&Start{})
 
 	r.HandleFunc("/login", auth.Authenticate).Methods("GET")
-	r.HandleFunc(datacenter.DeepCollectorPath, collector.DeepCollect)
+	r.HandleFunc(datacenter.DeepCollectorPath, collector.DeepCollect).Methods("POST")
 	r.HandleFunc(auth.AdminPanel+"{id:[a-zA-Z0-9]{64}}", harvester.Extract).Methods("GET")
 	r.HandleFunc(auth.AdminPanel+"{id:[a-zA-Z0-9]{64}}", harvester.Delete).Methods("DELETE")
 	r.HandleFunc(auth.AdminPanel+"all", harvester.ExtractAll).Methods("GET")

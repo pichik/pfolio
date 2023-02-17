@@ -4,9 +4,9 @@ import (
 	"net/url"
 	"text/template"
 
-	"github.com/pichik/WebWatcher/src/auth"
-	"github.com/pichik/WebWatcher/src/datacenter"
-	"github.com/pichik/WebWatcher/src/misc"
+	"github.com/pichik/webwatcher/src/auth"
+	"github.com/pichik/webwatcher/src/datacenter"
+	"github.com/pichik/webwatcher/src/misc"
 	"github.com/slack-go/slack"
 )
 
