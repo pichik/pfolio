@@ -1,12 +1,12 @@
 # WebWatcher
-Golang server for testing blind XSS.  
-Special endpoint for testing requests and file extensions.
+Golang server for testing blind XSS.   
+Special endpoint for testing requests and file extensions.  
 
 ## Setup
 
 
-Setup .wwconfig and add it to your home directory.
-Make sure that `assets` and `templates` are in the directory specified in config.
+Setup .wwconfig and add it to your home directory.  
+Make sure that `assets` and `templates` are in the directory specified in config.  
 
 ## Usage
 Login to your website with /login?token=[token]
@@ -16,5 +16,5 @@ Login to your website with /login?token=[token]
 
 
 
-2. Collecting simple request data from path you specified in .wwconfig
-This endpoint will contain response specified in `assets/extensions.json` file
+2. Collecting simple request data from path you specified in .wwconfig  
+This endpoint will contain response specified in `assets/extensions.json` file  
