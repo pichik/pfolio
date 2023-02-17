@@ -4,10 +4,13 @@ Special endpoint for testing requests and file extensions.
 
 ## Setup  
 1. Install  
-`go install github.com/pichik/webwatcher@latest`  
-
-2. Set permissions for ports  
-`sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher`  
+```
+go install github.com/pichik/webwatcher@latest
+```
+2. Set permissions for ports 
+```
+sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
+```
 
 3. Setup `.wwconfig` and add it to your home directory.  
 4. Make sure that `assets` and `templates` are in the directory specified in config.  
