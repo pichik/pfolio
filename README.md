@@ -21,10 +21,10 @@ Right side is from custom path requests.
 This endpoint will contain response specified in `assets/extensions.json` file  
 
 **Example:**  
-if you specified `"CollectorPath":"example"` in config file 
-and set .js extensions with payload `alert(1)` in `assets/extensions.json`  
+Set `"CollectorPath":"examplepath"` in `.wwconfig`  
+Set `.js` extension with payload `alert(1)` in `assets/extensions.json`  
 and insert this payload to the website, alert will popup.  
-`<script src=https://domain.com/example.js></script>`  
+`<script src=https://domain.com/examplepath.js></script>`  
 
 ### Collecting data from blind XSS  
 You can find detailed report for your XSS, with DOM and Screenshort.
