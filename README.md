@@ -5,24 +5,19 @@ Special endpoint for testing requests and file extensions.
 ## Setup  
 1. Install  
 ```
-go install github.com/pichik/webwatcher@latest // isthiscomment?
+git clone https://github.com/pichik/webwatcher
 ```
-2. Set permissions for ports 
+2. Build application
+```
+sudo go build -o /usr/local/bin/webwatcher main.go
+```
+3. Set permissions for ports 
 ```
 sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
-```
-<pre><code>```bash
-echo hi
-# This command does something
-$ some-command
-
-# This command does something else
-$ another-command
-```{.copy}
-</code></pre>
-3. Setup `.wwconfig` and add it to your home directory.  
-4. Make sure that `assets` and `templates` are in the directory specified in config.  
-
+``` 
+3. Fill `.wwconfig` and add it to your home directory.  
+4. Move web directory to a place specified in config.  
+5. Remove the rest.
 
 ## Usage
 Login to your website with /login?token=[token]  
