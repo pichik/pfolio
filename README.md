@@ -4,10 +4,12 @@ Special endpoint for testing requests and file extensions.
 
 ## Setup
 
+
 Setup .wwconfig and add it to your home directory.
+Make sure that `assets` and `templates` are in the directory specified in config.
 
 ## Usage
-Login to your website with /login?token=[token from .wwconfig]
+Login to your website with /login?token=[token]
 
 **Application have 2 parts**
 1. Collecting data from blind XSS
