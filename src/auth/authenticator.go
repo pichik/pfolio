@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/pichik/server/src/misc"
+	"github.com/pichik/WebWatcher/src/misc"
 )
 
 var AdminPanel = "/results/"

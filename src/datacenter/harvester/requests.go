@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/pichik/server/src/datacenter"
-	"github.com/pichik/server/src/misc"
+	"github.com/pichik/WebWatcher/src/datacenter"
+	"github.com/pichik/WebWatcher/src/misc"
 )
 
 func Extract(w http.ResponseWriter, r *http.Request) {

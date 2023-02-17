@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/pichik/server/src/misc"
+	"github.com/pichik/WebWatcher/src/misc"
 )
 
 type ExtensionData struct {

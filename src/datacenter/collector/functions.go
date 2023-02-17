@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"text/template"
 
-	"github.com/pichik/server/src/datacenter"
-	"github.com/pichik/server/src/misc"
+	"github.com/pichik/WebWatcher/src/datacenter"
+	"github.com/pichik/WebWatcher/src/misc"
 )
 
 func ImportTemplate() {

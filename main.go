@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pichik/server/src/auth"
-	"github.com/pichik/server/src/datacenter"
-	"github.com/pichik/server/src/datacenter/collector"
-	"github.com/pichik/server/src/datacenter/harvester"
-	"github.com/pichik/server/src/misc"
+	"github.com/pichik/WebWatcher/src/auth"
+	"github.com/pichik/WebWatcher/src/datacenter"
+	"github.com/pichik/WebWatcher/src/datacenter/collector"
+	"github.com/pichik/WebWatcher/src/datacenter/harvester"
+	"github.com/pichik/WebWatcher/src/misc"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"

@@ -1,4 +1,4 @@
-module github.com/pichik/server
+module github.com/pichik/WebWatcher
 
 go 1.19
 
