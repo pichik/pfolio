@@ -9,7 +9,7 @@ git clone https://github.com/pichik/webwatcher
 ```
 2. Build application
 ```
-sudo go build -o /usr/local/bin/webwatcher main.go
+sudo go build -o /usr/local/bin/webwatcher webwatcher/main.go
 ```
 3. Set permissions for ports 
 ```
