@@ -19,6 +19,8 @@ sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
 4. Move web directory to a place specified in config.  
 5. Remove the rest.
 
+All files in `assets/` are publicly accessible.  
+If you are running https, directory with certificates should be generated.  
 ## Usage
 Login to your website with /login?token=[token]  
 
