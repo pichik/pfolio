@@ -29,31 +29,20 @@ func (s *Start) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.Hand
 	SetHeaders(w)
 
 	if r.Method == "OPTIONS" {
-		misc.Custom404Handler(w)
-		return
-	}
-
-	if collector.Baited(w, r) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
+	collector.Bait(w, r)
+
 	if !auth.CanAccess(r) {
-		misc.Custom404Handler(w)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
-
 	next(w, r)
 }
 
 func (e *End) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if w.Header().Get("HasContent") == "true" {
-		w.Header().Del("HasContent")
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-	misc.Custom404Handler(w)
-
-	next(w, r)
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
@@ -72,7 +61,7 @@ func main() {
 	r.HandleFunc(auth.AdminPanel+"{id:[a-zA-Z0-9]{64}}", harvester.Delete).Methods("DELETE")
 	r.HandleFunc(auth.AdminPanel+"all", harvester.ExtractAll).Methods("GET")
 	r.HandleFunc(auth.AdminPanel+"all", harvester.DeleteAll).Methods("DELETE")
-	r.HandleFunc("/{id:"+misc.Config.CollectorPath+".*}", collector.RequestCollect)
+	r.HandleFunc("/{id:"+misc.Config.CollectorPath+".*}", collector.SimpleCollect)
 	r.PathPrefix("/").Handler(http.HandlerFunc(Assets)).Methods("GET")
 
 	n.UseHandler(r)
@@ -104,7 +93,6 @@ func Assets(w http.ResponseWriter, r *http.Request) {
 	_, err := os.Stat(misc.AssetsDir + r.URL.Path)
 
 	if err == nil {
-		w.Header().Set("HasContent", "true")
 		fs.ServeHTTP(w, r)
 	}
 }
@@ -117,7 +105,6 @@ func SetHeaders(w http.ResponseWriter) {
 
 func LoadFiles() {
 	misc.ImportLogs()
-	misc.ImportTemplates()
 	harvester.ImportTemplate()
 	collector.ImportTemplate()
 	collector.ImportExtensions()

@@ -2,6 +2,7 @@ package harvester
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/pichik/webwatcher/src/datacenter"
@@ -14,45 +15,40 @@ func Extract(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
 	var data *datacenter.Data
-	for _, d := range datacenter.Collection.DeepData {
+	for _, d := range datacenter.GetCollection() {
 		if d.HASH == id {
 			data = d
 			break
 		}
 	}
 	if data == nil {
+		misc.ErrorLog.Printf("%s - No data found with this id", id)
 		return
 	}
+	data.Screenshot = strings.TrimPrefix(data.Screenshot, "data:image/png;base64,")
 
-	err := extractorTemplate.Execute(w, data)
+	err := harvestDataTemplate.Execute(w, data)
 	if err != nil {
 		misc.ErrorLog.Printf("%s", err)
-	}
-	w.Header().Set("HasContent", "true")
-}
-
-func Delete(w http.ResponseWriter, r *http.Request) {
-	misc.DebugLog.Printf("[Deleting] [%s]%s", r.Method, r.RequestURI)
-
-	id := mux.Vars(r)["id"]
-
-	if r.URL.Query().Get("c") == "data" {
-		datacenter.Collection.DeepData = removeData(datacenter.Collection.DeepData, id)
-	} else if r.URL.Query().Get("c") == "request" {
-		datacenter.Collection.Request = removeData(datacenter.Collection.Request, id)
 	}
 }
 
 func ExtractAll(w http.ResponseWriter, r *http.Request) {
 	misc.DebugLog.Printf("[Extracting all] [%s]%s", r.Method, r.RequestURI)
 
-	err := cacheTemplate.Execute(w, datacenter.Collection)
+	err := harvestListTemplate.Execute(w, datacenter.GetCollection())
 	if err != nil {
 		misc.ErrorLog.Printf("%s", err)
 	}
-	w.Header().Set("HasContent", "true")
+}
+
+func Delete(w http.ResponseWriter, r *http.Request) {
+	misc.DebugLog.Printf("[Deleting] [%s]%s", r.Method, r.RequestURI)
+
+	id := mux.Vars(r)["id"]
+	datacenter.RemoveFromCollection(id)
 }
 
 func DeleteAll(w http.ResponseWriter, r *http.Request) {
-	datacenter.Collection = datacenter.DataCollection{}
+	datacenter.ClearCollection()
 }

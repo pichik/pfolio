@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pichik/webwatcher/src/misc"
 )
@@ -34,6 +35,7 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 			Value:    misc.Config.Token,
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
+			Expires:  time.Now().Add(365 * 24 * time.Hour),
 		}
 		http.SetCookie(w, cookie)
 		http.Redirect(w, r, AdminPanel+"all", http.StatusFound)

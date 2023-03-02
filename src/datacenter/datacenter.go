@@ -17,17 +17,14 @@ type Data struct {
 	Origin      string
 	DOM         string
 	IP          string
-	HASH        string
 	Method      string
 	Screenshot  string
+	HASH        string
+	Collection  string
 }
 
-type DataCollection struct {
-	DeepData []*Data
-	Request  []*Data
-}
+var collection []*Data
 
-var Collection DataCollection
 var DeepCollectorPath string = "/collector"
 var DeepCollectorRef string = misc.Config.Host + DeepCollectorPath
 
@@ -35,4 +32,24 @@ func CreateHash(secret string) string {
 	currentTime := time.Now().String()
 	hash := sha256.Sum256([]byte(secret + currentTime))
 	return fmt.Sprintf("%x", hash)
+}
+
+func GetCollection() []*Data {
+	return collection
+}
+
+func AddToCollection(data *Data) {
+	collection = append([]*Data{data}, collection...)
+}
+
+func RemoveFromCollection(hash string) {
+	for s, cd := range collection {
+		if cd.HASH == hash {
+			collection = append(collection[:s], collection[s+1:]...)
+		}
+	}
+}
+
+func ClearCollection() {
+	collection = []*Data{}
 }

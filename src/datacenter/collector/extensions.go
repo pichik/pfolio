@@ -37,7 +37,6 @@ func extensionUpgrade(endpoint string, w http.ResponseWriter) {
 	for _, v := range extensions {
 		for _, ext := range v.Extension {
 			if path.Ext(endpoint) == ext {
-				w.Header().Set("HasContent", "true")
 				w.Header().Set("Content-Type", fmt.Sprintf("%s", v.ContentType))
 				fmt.Fprintln(w, v.Payload)
 				misc.DebugLog.Printf("[Upgrading Extension] [%s]", endpoint)

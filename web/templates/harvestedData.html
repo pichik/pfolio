@@ -15,13 +15,13 @@
 
 <label for="browser-time">Time</label>
 <br>
-<input type="text" id="browser-time" name="browser-time" disabled value="{{$.BrowserTime}}">
+<input type="text" id="browser-time" name="browser-time" disabled value="{{.BrowserTime}}">
 
 <br><br>
 
 <label for="browser-time">IP</label>
 <br>
-<input type="text" id="ip" name="ip" disabled value="{{$.IP}}">
+<input type="text" id="ip" name="ip" disabled value="{{.IP}}">
 
 <br><br>
 
@@ -61,7 +61,7 @@
 </div>
 </div>
 
-<img src="{{.Screenshot}}" width="100%" height="auto">
+<img src="data:image/png;base64,{{.Screenshot}}" width="100%" height="auto">
 </div>
 </body>
 </html>

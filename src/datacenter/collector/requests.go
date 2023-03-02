@@ -1,10 +1,10 @@
 package collector
 
 import (
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/pichik/webwatcher/src/auth"
@@ -14,18 +14,16 @@ import (
 
 var baitTemplate *template.Template
 
-func Baited(w http.ResponseWriter, r *http.Request) bool {
+func Bait(w http.ResponseWriter, r *http.Request) {
 
 	if auth.IsAuthed(r) || r.URL.Path == datacenter.DeepCollectorPath || strings.HasPrefix(r.URL.Path, "/"+misc.Config.CollectorPath) {
-		return false
+		return
 	}
 
-	if (r.Referer() != "" && !strings.HasPrefix(r.Referer(), misc.Config.Host)) || r.Header.Get("Origin") != "" || r.Header.Get("Accept") == "*/*" || r.Header.Get("Sec-Fetch-Dest") == "script" {
-		throwBait(w)
-		misc.DebugLog.Printf("[Sending Bait] [%s]%s", r.Method, r.RequestURI)
-		return true
-	}
-	return false
+	throwBait(w)
+	w.WriteHeader(http.StatusOK)
+
+	misc.DebugLog.Printf("[Sending Bait] [%s]%s", r.Method, r.RequestURI)
 }
 
 func DeepCollect(w http.ResponseWriter, r *http.Request) {
@@ -41,25 +39,33 @@ func DeepCollect(w http.ResponseWriter, r *http.Request) {
 	data.IP = strings.Split(r.RemoteAddr, ":")[0]
 	data.HASH = datacenter.CreateHash("data")
 	data.BrowserTime = time.Now().Format("02.01.2006 | 15:04:05")
-	datacenter.Collection.DeepData = append([]*datacenter.Data{data}, datacenter.Collection.DeepData...)
+	data.Collection = "Deep"
+
+	datacenter.AddToCollection(data)
 
 	webhookSend(data)
 }
 
-func RequestCollect(w http.ResponseWriter, r *http.Request) {
+func SimpleCollect(w http.ResponseWriter, r *http.Request) {
+	if auth.IsAuthed(r) || r.URL.Path == datacenter.DeepCollectorPath {
+		return
+	}
+
 	misc.DebugLog.Printf("[Request Collecting] [%s]%s", r.Method, r.RequestURI)
 
 	var data = datacenter.Data{
-		IP:       strings.Split(r.RemoteAddr, ":")[0],
-		Method:   r.Method,
-		Origin:   r.Header.Get("Origin"),
-		Referrer: r.Header.Get("Referer"),
-		Location: r.URL.RequestURI(),
-		HASH:     datacenter.CreateHash("request"),
+		IP:         strings.Split(r.RemoteAddr, ":")[0],
+		Method:     r.Method,
+		Origin:     r.Header.Get("Origin"),
+		Referrer:   r.Header.Get("Referer"),
+		UserAgent:  r.UserAgent(),
+		Location:   r.URL.RequestURI(),
+		HASH:       datacenter.CreateHash("request"),
+		Collection: "Simple",
 
 		BrowserTime: time.Now().Format("02.01.2006 | 15:04:05"),
 	}
-	datacenter.Collection.Request = append([]*datacenter.Data{&data}, datacenter.Collection.Request...)
+	datacenter.AddToCollection(&data)
 
 	if strings.HasPrefix(r.URL.Path, "/"+misc.Config.CollectorPath) {
 		misc.DebugLog.Printf("[Checking extension] [%s]", r.URL.Path)

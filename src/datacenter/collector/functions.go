@@ -2,8 +2,8 @@ package collector
 
 import (
 	"encoding/json"
+	"html/template"
 	"net/http"
-	"text/template"
 
 	"github.com/pichik/webwatcher/src/datacenter"
 	"github.com/pichik/webwatcher/src/misc"
