@@ -1,4 +1,3 @@
-
 // IMPORT HTML TO CANVAS FOR SCREENSHOTS
 script = document.createElement('script');
 script.type = 'text/javascript';

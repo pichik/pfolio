@@ -29,7 +29,7 @@ func webhookSend(data *datacenter.Data) {
 
 	attachment := slack.Attachment{
 		Pretext:    parsedURL.Host,
-		Text:       misc.Config.Host + auth.AdminPanel + data.HASH,
+		Text:       misc.Config.Host + auth.AdminPanel + "/" + data.HASH,
 		Color:      "#BF11A8",
 		MarkdownIn: []string{"text", "title", "value", "fields"},
 		// Fields are Optional extra data!

@@ -1,10 +1,12 @@
 package harvester
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/pichik/webwatcher/src/auth"
 	"github.com/pichik/webwatcher/src/datacenter"
 	"github.com/pichik/webwatcher/src/misc"
 )
@@ -31,15 +33,28 @@ func Extract(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		misc.ErrorLog.Printf("%s", err)
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func ExtractAll(w http.ResponseWriter, r *http.Request) {
 	misc.DebugLog.Printf("[Extracting all] [%s]%s", r.Method, r.RequestURI)
 
-	err := harvestListTemplate.Execute(w, datacenter.GetCollection())
-	if err != nil {
-		misc.ErrorLog.Printf("%s", err)
+	if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+		// If it is an AJAX request, return the data as JSON
+		data, err := json.Marshal(datacenter.GetCollection())
+		if err != nil {
+			misc.ErrorLog.Printf("%s", err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+	} else {
+		err := harvestListTemplate.Execute(w, auth.AdminPanel)
+		if err != nil {
+			misc.ErrorLog.Printf("%s", err)
+		}
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
@@ -47,8 +62,10 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	id := mux.Vars(r)["id"]
 	datacenter.RemoveFromCollection(id)
+	w.WriteHeader(http.StatusOK)
 }
 
 func DeleteAll(w http.ResponseWriter, r *http.Request) {
 	datacenter.ClearCollection()
+	w.WriteHeader(http.StatusOK)
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/pichik/webwatcher/src/misc"
 )
 
-var AdminPanel = "/results/"
+var AdminPanel = "/results"
 
 func CanAccess(r *http.Request) bool {
 	if strings.HasPrefix(r.URL.Path, AdminPanel) && !IsAuthed(r) {
@@ -28,7 +28,7 @@ func IsAuthed(r *http.Request) bool {
 	return true
 }
 
-func Authenticate(w http.ResponseWriter, r *http.Request) {
+func Authenticate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	if r.URL.Query().Get("token") == misc.Config.Token {
 		cookie := &http.Cookie{
 			Name:     "token",
@@ -38,7 +38,8 @@ func Authenticate(w http.ResponseWriter, r *http.Request) {
 			Expires:  time.Now().Add(365 * 24 * time.Hour),
 		}
 		http.SetCookie(w, cookie)
-		http.Redirect(w, r, AdminPanel+"all", http.StatusFound)
+		http.Redirect(w, r, AdminPanel+"/all", http.StatusFound)
 		return
 	}
+	next(w, r)
 }

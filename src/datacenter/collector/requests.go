@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pichik/webwatcher/src/auth"
 	"github.com/pichik/webwatcher/src/datacenter"
 	"github.com/pichik/webwatcher/src/misc"
 )
@@ -15,11 +14,6 @@ import (
 var baitTemplate *template.Template
 
 func Bait(w http.ResponseWriter, r *http.Request) {
-
-	if auth.IsAuthed(r) || r.URL.Path == datacenter.DeepCollectorPath || strings.HasPrefix(r.URL.Path, "/"+misc.Config.CollectorPath) {
-		return
-	}
-
 	throwBait(w)
 	w.WriteHeader(http.StatusOK)
 
@@ -46,11 +40,7 @@ func DeepCollect(w http.ResponseWriter, r *http.Request) {
 	webhookSend(data)
 }
 
-func SimpleCollect(w http.ResponseWriter, r *http.Request) {
-	if auth.IsAuthed(r) || r.URL.Path == datacenter.DeepCollectorPath {
-		return
-	}
-
+func SimpleCollect(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	misc.DebugLog.Printf("[Request Collecting] [%s]%s", r.Method, r.RequestURI)
 
 	var data = datacenter.Data{
@@ -67,8 +57,12 @@ func SimpleCollect(w http.ResponseWriter, r *http.Request) {
 	}
 	datacenter.AddToCollection(&data)
 
-	if strings.HasPrefix(r.URL.Path, "/"+misc.Config.CollectorPath) {
-		misc.DebugLog.Printf("[Checking extension] [%s]", r.URL.Path)
-		extensionUpgrade(r.URL.Path, w)
-	}
+	next(w, r)
+	w.WriteHeader(http.StatusOK)
+}
+
+func GetExtension(w http.ResponseWriter, r *http.Request) {
+	misc.DebugLog.Printf("[Checking extension] [%s]", r.URL.Path)
+	extensionUpgrade(r.URL.Path, w)
+	w.WriteHeader(http.StatusOK)
 }

@@ -2,7 +2,7 @@
  "Hostname":"example.com",
  "Token":"[login-token]",
  "Directory":"$HOME/web/",
- "CollectorPath":"example",
+ "CollectorPath":"/example",
  "SlackToken":"[slack-token]"
  "SlackChannel":"[slack-channel-id]"
 

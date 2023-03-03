@@ -6,10 +6,10 @@ label, input,button {
   display: inline-block;
 }
 input, button {
-  width:85%;
+  width:80%;
 }
  label {
-  width:11%;
+  width:15%;
 }
 </style>
 </head>
@@ -17,7 +17,7 @@ input, button {
 
 <div class="page">
   <div class="center-button">
-  <button onclick="rf()" style="display: block;">Refresh or not</button>
+  <button onclick="updateResults()" style="display: block;">Refresh</button>
   <br>
   <button onclick="rmvAll()" style="display: block;">Clear</button>
   <br>
@@ -40,117 +40,132 @@ input, button {
 <script>
 var refreshRate = parseInt(new URLSearchParams(window.location.search).get("refresh"));
 
+if (!refreshRate){
+  history.pushState(null, null, window.location.href + "?refresh=15");
+  refreshRate = 15;
+}
+
 var deepDiv = document.getElementById("deep");
 var simpleDiv = document.getElementById("simple");
 
 
-{{range $value := .}}
-var div = document.createElement("div")
+function updateResults() {
+    fetch('/results/all', { headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    .then(response => response.json())
+    .then(data => {
+        // Clear the existing content
+        deepDiv.innerHTML = '';
+        simpleDiv.innerHTML = '';
 
+        if (data == null){
+          return
+        }
+        // Loop through the data and add the new content
+        data.forEach(function(value) {
 
-var label = document.createElement("label")
-label.innerHTML = "IP and Time:"
-var input = document.createElement("input")
-input.type = "text"
-input.value = "{{$value.IP}} \t\t\t {{$value.BrowserTime}}"
-input.disabled = true
-div.appendChild(label);
-div.appendChild(input);
-div.appendChild(document.createElement("br"));
+        var div = document.createElement("div")
 
-var label = document.createElement("label")
-label.innerHTML = "Url:"
-var input = document.createElement("input")
-input.type = "text"
-input.value = "{{$value.Location}}"
-input.disabled = true
-div.appendChild(label);
-div.appendChild(input);
-div.appendChild(document.createElement("br"));
+        var label = document.createElement("label")
+        label.innerHTML = "IP and Time:"
+        var input = document.createElement("input")
+        input.type = "text"
+        input.value = value.IP+ "\t\t\t"+ value.BrowserTime
+        input.disabled = true
+        div.appendChild(label);
+        div.appendChild(input);
+        div.appendChild(document.createElement("br"));
 
-var label = document.createElement("label")
-label.innerHTML = "Origin:"
-var input = document.createElement("input")
-input.type = "text"
-input.value = "{{$value.Origin}}"
-input.disabled = true
-div.appendChild(label);
-div.appendChild(input);
-div.appendChild(document.createElement("br"));
+        var label = document.createElement("label")
+        label.innerHTML = "Url:"
+        var input = document.createElement("input")
+        input.type = "text"
+        input.value = value.Location
+        input.disabled = true
+        div.appendChild(label);
+        div.appendChild(input);
+        div.appendChild(document.createElement("br"));
 
-var label = document.createElement("label")
-label.innerHTML = "Referer:"
-var input = document.createElement("input")
-input.type = "text"
-input.value = "{{$value.Referrer}}"
-input.disabled = true
-div.appendChild(label);
-div.appendChild(input);
-div.appendChild(document.createElement("br"));
+        var label = document.createElement("label")
+        label.innerHTML = "Origin:"
+        var input = document.createElement("input")
+        input.type = "text"
+        input.value = value.Origin
+        input.disabled = true
+        div.appendChild(label);
+        div.appendChild(input);
+        div.appendChild(document.createElement("br"));
 
-var label = document.createElement("label")
-label.innerHTML = "User Agent:"
-var input = document.createElement("input")
-input.type = "text"
-input.value = "{{$value.UserAgent}}"
-input.disabled = true
-div.appendChild(label);
-div.appendChild(input);
-div.appendChild(document.createElement("br"));
+        var label = document.createElement("label")
+        label.innerHTML = "Referer:"
+        var input = document.createElement("input")
+        input.type = "text"
+        input.value = value.Referrer
+        input.disabled = true
+        div.appendChild(label);
+        div.appendChild(input);
+        div.appendChild(document.createElement("br"));
 
-if ("{{$value.Collection}}" === "Deep"){
-  var label = document.createElement("label")
-  var btn = document.createElement("button");
-  btn.onclick = function jsFunc() {window.location='/results/{{$value.HASH}}'};
-  btn.innerHTML = "Details"
-  div.appendChild(label);
-  div.appendChild(btn);
-  div.appendChild(document.createElement("br"));
+        var label = document.createElement("label")
+        label.innerHTML = "User Agent:"
+        var input = document.createElement("input")
+        input.type = "text"
+        input.value = value.UserAgent
+        input.disabled = true
+        div.appendChild(label);
+        div.appendChild(input);
+        div.appendChild(document.createElement("br"));
+
+        if (value.Collection === "Deep"){
+          var label = document.createElement("label")
+          var btn = document.createElement("button");
+          btn.onclick = function jsFunc() {window.location='/results/'+value.HASH};
+          btn.innerHTML = "Details"
+          div.appendChild(label);
+          div.appendChild(btn);
+          div.appendChild(document.createElement("br"));
+        }
+
+        var label = document.createElement("label")
+        var btn = document.createElement("button");
+        btn.onclick = function(){ rmv(value.HASH); };
+        btn.innerHTML = "Remove"
+        div.appendChild(label);
+        div.appendChild(btn);
+
+        div.appendChild(document.createElement("br"));
+        div.appendChild(document.createElement("br"));
+        div.appendChild(document.createElement("br"));
+
+        if (value.Collection === "Deep"){
+          deepDiv.appendChild(div);
+        }else if (value.Collection === "Simple"){
+          simpleDiv.appendChild(div);
+        }
+      });
+})
+.catch(error => console.error('Error:', error));
 }
-
-var label = document.createElement("label")
-var btn = document.createElement("button");
-btn.onclick = function(){ rmv("{{$value.HASH}}", "data"); };
-btn.innerHTML = "Remove"
-div.appendChild(label);
-div.appendChild(btn);
-
-div.appendChild(document.createElement("br"));
-div.appendChild(document.createElement("br"));
-div.appendChild(document.createElement("br"));
-
-if ("{{$value.Collection}}" === "Deep"){
-  deepDiv.appendChild(div);
-}else if ("{{$value.Collection}}" === "Simple"){
-  simpleDiv.appendChild(div);
-}
-{{end}}
 
 
 if (refreshRate > 0){
   setInterval(function(){
-     location.reload();
+     updateResults();
   }, (refreshRate*1000));
 }
 
-function rf(){
-  if (refreshRate > 0){
-    window.location = window.location.pathname;
-  }else{
-    window.location=  "?refresh=15";
-  }
+window.onload = function() {
+    updateResults();
 }
 
 function rmvAll(){
-  fetch("/results/all", { method: "DELETE"})
-  location.reload();
+  fetch("{{.}}/all", { method: "DELETE"})
+  updateResults();
 }
 
-function rmv(hash, c){
-  fetch("/results/"+hash+"?c="+c, { method: "DELETE"})
-  location.reload();
+function rmv(hash){
+  fetch("{{.}}/"+hash, { method: "DELETE"})
+  updateResults();
 }
-
 
 </script>
 </body>

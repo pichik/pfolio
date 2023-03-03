@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/pichik/webwatcher/src/auth"
@@ -17,57 +16,89 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-type Start struct {
-	Token string
-}
-type End struct {
-	Token string
-}
+func setHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if !auth.IsAuthed(r) {
+		misc.RequestLog.Printf("%-17s %9s %s", "["+strings.Split(r.RemoteAddr, ":")[0]+"]", "["+r.Method+"]", r.RequestURI)
+	}
 
-func (s *Start) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	misc.RequestLog.Printf("%-17s %9s %s", "["+strings.Split(r.RemoteAddr, ":")[0]+"]", "["+r.Method+"]", r.RequestURI)
-	SetHeaders(w)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-	collector.Bait(w, r)
-
-	if !auth.CanAccess(r) {
-		w.WriteHeader(http.StatusOK)
 		return
 	}
 	next(w, r)
 }
 
-func (e *End) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func checkAuth(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	if !auth.IsAuthed(r) {
+		setBait(w, r)
+		return
+	}
+	next(w, r)
+}
+func login(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	next(w, r)
+}
+
+func setBait(w http.ResponseWriter, r *http.Request) {
+	collector.Bait(w, r)
 	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
-	LoadFiles()
+	loadFiles()
 
 	r := mux.NewRouter()
 	n := negroni.Classic()
 
-	//Request handler order
+	n.Use(negroni.NewStatic(http.Dir(misc.AssetsDir)))
+	n.UseFunc(setHeaders)
 
-	n.Use(&Start{})
+	setupAdminRoutes(r)
+	setupCollectorRoutes(r)
 
-	r.HandleFunc("/login", auth.Authenticate).Methods("GET")
+	r.PathPrefix("/login").Handler(negroni.New(
+		negroni.HandlerFunc(auth.Authenticate),
+		negroni.HandlerFunc(checkAuth),
+	))
+
 	r.HandleFunc(datacenter.DeepCollectorPath, collector.DeepCollect).Methods("POST")
-	r.HandleFunc(auth.AdminPanel+"{id:[a-zA-Z0-9]{64}}", harvester.Extract).Methods("GET")
-	r.HandleFunc(auth.AdminPanel+"{id:[a-zA-Z0-9]{64}}", harvester.Delete).Methods("DELETE")
-	r.HandleFunc(auth.AdminPanel+"all", harvester.ExtractAll).Methods("GET")
-	r.HandleFunc(auth.AdminPanel+"all", harvester.DeleteAll).Methods("DELETE")
-	r.HandleFunc("/{id:"+misc.Config.CollectorPath+".*}", collector.SimpleCollect)
-	r.PathPrefix("/").Handler(http.HandlerFunc(Assets)).Methods("GET")
+	r.NotFoundHandler = http.HandlerFunc(setBait)
 
 	n.UseHandler(r)
 
-	n.Use(&End{})
+	server, certManager := setupServer(n)
+	go http.ListenAndServe(":http", certManager.HTTPHandler(n))
+	log.Fatal(server.ListenAndServeTLS("", ""))
+}
 
+func setupAdminRoutes(r *mux.Router) {
+	adminRoutes := mux.NewRouter().PathPrefix(auth.AdminPanel).Subrouter()
+	adminRoutes.HandleFunc("/{id:[a-zA-Z0-9]{64}}", harvester.Extract).Methods("GET")
+	adminRoutes.HandleFunc("/{id:[a-zA-Z0-9]{64}}", harvester.Delete).Methods("DELETE")
+	adminRoutes.HandleFunc("/all", harvester.ExtractAll).Methods("GET")
+	adminRoutes.HandleFunc("/all", harvester.DeleteAll).Methods("DELETE")
+
+	r.PathPrefix(auth.AdminPanel).Handler(negroni.New(
+		negroni.HandlerFunc(checkAuth),
+		negroni.Wrap(adminRoutes),
+	))
+}
+
+func setupCollectorRoutes(r *mux.Router) {
+	collectorRoutes := mux.NewRouter().PathPrefix("/").Subrouter()
+	collectorRoutes.HandleFunc(misc.Config.CollectorPath+"{ext:.*\\.[a-zA-Z0-9]+}", collector.GetExtension)
+	collectorRoutes.HandleFunc(misc.Config.CollectorPath+"{any:.*}", setBait)
+
+	r.PathPrefix(misc.Config.CollectorPath).Handler(negroni.New(
+		negroni.HandlerFunc(collector.SimpleCollect),
+		negroni.Wrap(collectorRoutes),
+	))
+}
+
+func setupServer(n *negroni.Negroni) (*http.Server, autocert.Manager) {
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(misc.Config.Hostname, "www."+misc.Config.Hostname),
@@ -79,31 +110,10 @@ func main() {
 		Handler:   n,
 		TLSConfig: certManager.TLSConfig(),
 	}
-
-	go http.ListenAndServe(":http", certManager.HTTPHandler(n))
-	log.Fatal(server.ListenAndServeTLS("", ""))
+	return server, certManager
 }
 
-func Assets(w http.ResponseWriter, r *http.Request) {
-	if strings.HasSuffix(r.URL.Path, "/") {
-		return
-	}
-
-	fs := http.FileServer(http.Dir(misc.AssetsDir))
-	_, err := os.Stat(misc.AssetsDir + r.URL.Path)
-
-	if err == nil {
-		fs.ServeHTTP(w, r)
-	}
-}
-
-func SetHeaders(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-}
-
-func LoadFiles() {
+func loadFiles() {
 	misc.ImportLogs()
 	harvester.ImportTemplate()
 	collector.ImportTemplate()

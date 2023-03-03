@@ -32,7 +32,8 @@ func ImportExtensions() {
 	misc.DebugLog.Printf("[Extensions available] [%s]", extensions)
 }
 
-func extensionUpgrade(endpoint string, w http.ResponseWriter) {
+func extensionUpgrade(endpoint string, w http.ResponseWriter) bool {
+	ImportExtensions()
 
 	for _, v := range extensions {
 		for _, ext := range v.Extension {
@@ -40,8 +41,9 @@ func extensionUpgrade(endpoint string, w http.ResponseWriter) {
 				w.Header().Set("Content-Type", fmt.Sprintf("%s", v.ContentType))
 				fmt.Fprintln(w, v.Payload)
 				misc.DebugLog.Printf("[Upgrading Extension] [%s]", endpoint)
-				return
+				return true
 			}
 		}
 	}
+	return false
 }
