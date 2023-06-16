@@ -12,7 +12,7 @@
   "txt": {
     "Extension": [".txt"],
     "Content-Type": "text/plain",
-    "Payload": "hello there"
+    "Payload": "hello there world"
   },
   "js": {
     "Extension": [".js", ".mjs"],
