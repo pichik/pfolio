@@ -2,7 +2,7 @@ package collector
 
 import (
 	"encoding/json"
-	"html/template"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/pichik/webwatcher/src/datacenter"
@@ -10,16 +10,26 @@ import (
 )
 
 func ImportTemplate() {
-	tmp, err := template.ParseFiles(misc.TemplateDir + "bait.js")
+	// tmp, err := template.ParseFiles(misc.TemplateDir + "bait.js")
+	// if err != nil {
+	// 	misc.ErrorLog.Printf("%s", err)
+	// }
+	// baitTemplate = tmp
+	filePath := misc.TemplateDir + "bait.js"
+	content, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		misc.ErrorLog.Printf("%s", err)
 	}
-	baitTemplate = tmp
+	baitContent = content
 }
 
 func throwBait(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/javascript")
-	err := baitTemplate.Execute(w, datacenter.DeepCollectorRef)
+	// w.Header().Set("Content-Type", "text/javascript")
+	// err := baitTemplate.Execute(w, datacenter.DeepCollectorRef)
+	// if err != nil {
+	// 	misc.ErrorLog.Printf("%s", err)
+	// }
+	_, err := w.Write(baitContent)
 	if err != nil {
 		misc.ErrorLog.Printf("%s", err)
 	}

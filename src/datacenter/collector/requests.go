@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -11,7 +10,7 @@ import (
 	"github.com/pichik/webwatcher/src/misc"
 )
 
-var baitTemplate *template.Template
+var baitContent []byte
 
 func Bait(w http.ResponseWriter, r *http.Request) {
 	throwBait(w)
