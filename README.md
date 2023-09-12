@@ -22,7 +22,8 @@ sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
 All files in `assets/` are publicly accessible.  
 If you are running https, directory with certificates should be generated.  
 
-Change domain in bait.js to your domain name.
+**!! Change domain in bait.js to your domain name !!**  
+
 ## Usage
 Login to your website with /login?token=[token]  
 
