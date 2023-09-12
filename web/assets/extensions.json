@@ -16,7 +16,7 @@
   },
   "js": {
     "Extension": [".js", ".mjs"],
-    "Content-Type": "application/javascript",
+    "Content-Type": "text/javascript",
     "Payload": "alert(document.domain)"
   },
   "jpg": {

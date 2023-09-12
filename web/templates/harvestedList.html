@@ -2,10 +2,10 @@
 <head>
 <link rel="stylesheet" type="text/css" href="/style.css">
 <style>
-label, input,button {
+label, input,button,select {
   display: inline-block;
 }
-input, button {
+input, button,select {
   width:80%;
 }
  label {
@@ -19,7 +19,15 @@ input, button {
   <div class="center-button">
   <button onclick="updateResults()" style="display: block;">Refresh</button>
   <br>
-  <button onclick="rmvAll()" style="display: block;">Clear</button>
+  <!--<button onclick="rmvAll()" style="display: block;" disabled>Show</button>-->
+  <select id="fi" onchange="changeTimeFilter(this.selectedIndex, this.value)" style="display: block;">
+    <option value="100000">Show all data</option>
+    <option value="0">Show only new data</option>
+    <option value="1">Show data from last month</option>
+    <option value="3">Show data from last 3 Months</option>
+    <option value="6">Show data from last 6 Months</option>
+    <option value="12">Show data from last year</option>
+</select>
   <br>
   <br>
 </div>
@@ -38,19 +46,47 @@ input, button {
 </div>
 
 <script>
+
+var timeFilter = getCookie("filter");
+if (!timeFilter){}
+if(timeFilter === ""){
+  timeFilter="0/0"
+}
+
+document.getElementById("fi").selectedIndex = timeFilter.split('/')[0];
+
+
+function changeTimeFilter(selectedIndex, selectedValue){
+  if(selectedIndex == 0){
+    timeFilter="0/0";
+  }else{
+    const currentTime = new Date().getTime();
+    const startDate = new Date(currentTime);
+    startDate.setMonth(startDate.getMonth() - selectedValue);
+
+    timeFilter=Math.floor(startDate / 1000);;
+    timeFilter=selectedIndex+"/"+timeFilter
+  }
+  updateResults();
+}
+
+
 var refreshRate = parseInt(new URLSearchParams(window.location.search).get("refresh"));
 
 if (!refreshRate){
-  history.pushState(null, null, window.location.href + "?refresh=15");
-  refreshRate = 15;
+  refreshRate = getCookie("refresh");
+  if (!refreshRate){
+    refreshRate = 15;
+  }
+  history.pushState(null, null, window.location.href + "?refresh="+refreshRate);
 }
 
 var deepDiv = document.getElementById("deep");
 var simpleDiv = document.getElementById("simple");
 
 
-function updateResults() {
-    fetch('/results/all', { headers: {'X-Requested-With': 'XMLHttpRequest'}})
+function updateResults(filter) {
+    fetch('/results/all?filter='+timeFilter, { method: 'POST'})
     .then(response => response.json())
     .then(data => {
         // Clear the existing content
@@ -157,14 +193,31 @@ window.onload = function() {
     updateResults();
 }
 
-function rmvAll(){
-  fetch("{{.}}/all", { method: "DELETE"})
-  updateResults();
-}
+// function rmvAll(){
+//   fetch("{{.}}/all", { method: "DELETE"})
+//   updateResults();
+// }
 
 function rmv(hash){
   fetch("{{.}}/"+hash, { method: "DELETE"})
-  updateResults();
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Network response was not ok.");
+    }
+    })
+    .then((data) => {
+      updateResults();
+    })
+    .catch((error) => {
+    console.error("Error deleting data:", error);
+  });
+  // updateResults();
+}
+
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  const cookie = cookies.find(c => c.trim().startsWith(name + '='));
+  return cookie ? cookie.split('=')[1] : null;
 }
 
 </script>

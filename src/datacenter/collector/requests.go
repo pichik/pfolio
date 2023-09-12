@@ -32,6 +32,7 @@ func DeepCollect(w http.ResponseWriter, r *http.Request) {
 	data.IP = strings.Split(r.RemoteAddr, ":")[0]
 	data.HASH = datacenter.CreateHash("data")
 	data.BrowserTime = time.Now().Format("02.01.2006 | 15:04:05")
+	data.Timestamp = time.Now().Unix()
 	data.Collection = "Deep"
 
 	datacenter.AddToCollection(data)
@@ -51,7 +52,7 @@ func SimpleCollect(w http.ResponseWriter, r *http.Request, next http.HandlerFunc
 		Location:   r.URL.RequestURI(),
 		HASH:       datacenter.CreateHash("request"),
 		Collection: "Simple",
-
+		Timestamp: 	time.Now().Unix(),
 		BrowserTime: time.Now().Format("02.01.2006 | 15:04:05"),
 	}
 	datacenter.AddToCollection(&data)

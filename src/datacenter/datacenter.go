@@ -21,35 +21,27 @@ type Data struct {
 	Screenshot  string
 	HASH        string
 	Collection  string
+	Visible     int
+	Timestamp   int64
 }
-
-var collection []*Data
 
 var DeepCollectorPath string = "/collector"
 var DeepCollectorRef string = misc.Config.Host + DeepCollectorPath
 
 func CreateHash(secret string) string {
-	currentTime := time.Now().String()
-	hash := sha256.Sum256([]byte(secret + currentTime))
+	currentTime := time.Now().UnixNano() / int64(time.Millisecond)
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s%d", secret, currentTime)))
 	return fmt.Sprintf("%x", hash)
 }
 
-func GetCollection() []*Data {
-	return collection
+func GetCollection(timestamp string) []*Data {
+	return readData(timestamp)
 }
 
 func AddToCollection(data *Data) {
-	collection = append([]*Data{data}, collection...)
+	saveNewData(data)
 }
 
 func RemoveFromCollection(hash string) {
-	for s, cd := range collection {
-		if cd.HASH == hash {
-			collection = append(collection[:s], collection[s+1:]...)
-		}
-	}
-}
-
-func ClearCollection() {
-	collection = []*Data{}
+	removeData(hash)
 }

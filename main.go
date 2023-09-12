@@ -79,7 +79,8 @@ func setupAdminRoutes(r *mux.Router) {
 	adminRoutes.HandleFunc("/{id:[a-zA-Z0-9]{64}}", harvester.Extract).Methods("GET")
 	adminRoutes.HandleFunc("/{id:[a-zA-Z0-9]{64}}", harvester.Delete).Methods("DELETE")
 	adminRoutes.HandleFunc("/all", harvester.ExtractAll).Methods("GET")
-	adminRoutes.HandleFunc("/all", harvester.DeleteAll).Methods("DELETE")
+	adminRoutes.HandleFunc("/all", harvester.UpdateAll).Methods("POST")
+	// adminRoutes.HandleFunc("/all", harvester.DeleteAll).Methods("DELETE")
 
 	r.PathPrefix(auth.AdminPanel).Handler(negroni.New(
 		negroni.HandlerFunc(checkAuth),
@@ -119,4 +120,5 @@ func loadFiles() {
 	collector.ImportTemplate()
 	collector.ImportExtensions()
 	collector.WebhookLoad()
+	datacenter.CreateDatabase()
 }

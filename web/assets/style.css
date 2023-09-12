@@ -6,7 +6,7 @@ background-color: #180F18;
 color: #fff;
 font-size: 18px;
 }
-input, textarea, button {
+input, textarea, button, select {
 font-family: 'Roboto Mono', monospace;
 background-color: #372337;
 border-radius: 6px;
@@ -14,11 +14,11 @@ color: #fff;
 font-size:18px;
 
 }
-input,button{
+input,button,select{
 text-align:center;
 padding: 3px
 }
-button{
+button,select{
 border-color:#D62698;
 margin-top:5px;
 background-color: #180F18;
