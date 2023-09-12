@@ -21,6 +21,8 @@ sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
 
 All files in `assets/` are publicly accessible.  
 If you are running https, directory with certificates should be generated.  
+
+Change domain in bait.js to your domain name.
 ## Usage
 Login to your website with /login?token=[token]  
 
@@ -51,4 +53,16 @@ These request will be sent to slack, if specified in config.
 ![blind xss](screenshots/blindxss.png)  
 
 
+## Aliases
+Useful linux aliases  
+```
+alias webstep='sudo mv ~/main /usr/local/bin/ww'
+alias webstep2='sudo setcap CAP_NET_BIND_SERVICE+ep /usr/local/bin/ww'
+alias wwinstal='webstep && webstep2; echo "Web watcher installed"'
 
+alias wwstart='nohup ww >/dev/null 2>&1 & echo "Web watcher started"'
+alias wwstop='pkill ww; echo "Web watcher stopped"'
+alias wwrestart='wwstop;wwstart; echo "Web watcher restarted"'
+alias wwdebug='tail -f ~/web/logs/debug.txt'
+alias wwlog='tail -f ~/web/logs/requests.txt'
+```
