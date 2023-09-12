@@ -141,4 +141,3 @@ if( document.readyState == "complete" ) {
     });
 }
 
-fetch('https://p-k.fun/pihit/?domain='+document.domain);
