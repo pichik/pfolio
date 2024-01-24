@@ -1,0 +1,5 @@
+{
+ "Hostname":"example.com",
+ "Token":"[login-token]",
+ "Directory":"$HOME/pfolio/"
+}
