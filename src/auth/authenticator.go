@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pichik/webwatcher/src/misc"
+	"github.com/pichik/pfolio/src/misc"
 )
 
 var AdminPanel = "/results"

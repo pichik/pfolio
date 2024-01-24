@@ -1,4 +1,4 @@
-module github.com/pichik/webwatcher
+module github.com/pichik/pfolio
 
 go 1.19
 

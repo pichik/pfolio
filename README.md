@@ -5,15 +5,15 @@ Special endpoint for testing requests and file extensions.
 ## Setup  
 1. Install  
 ```
-git clone https://github.com/pichik/webwatcher
+git clone https://github.com/pichik/pfolio
 ```
 2. Build application
 ```
-sudo go build -o /usr/local/bin/webwatcher webwatcher/main.go
+sudo go build -o /usr/local/bin/pfolio pfolio/main.go
 ```
 3. Set permissions for ports 
 ```
-sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/webwatcher
+sudo setcap CAP_NET_BIND_SERVICE+ep ~/go/bin/pfolio
 ``` 
 3. Fill `.wwconfig` and add it to your home directory.  
 4. Move web directory to a place specified in config.  

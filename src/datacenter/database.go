@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pichik/webwatcher/src/misc"
+	"github.com/pichik/pfolio/src/misc"
 )
 
 var createTableQuery = `
