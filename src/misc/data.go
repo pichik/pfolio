@@ -28,7 +28,7 @@ type ConfigData struct {
 var Config ConfigData
 
 func init() {
-	file, err := ioutil.ReadFile(home + "/.wwconfig")
+	file, err := ioutil.ReadFile(home + "/.pfconfig")
 
 	if err != nil {
 		panic(err)
