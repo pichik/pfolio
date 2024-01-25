@@ -79,7 +79,7 @@ func main() {
 
 func setupDataRoutes(r *mux.Router) {
 	dataRoutes := mux.NewRouter().PathPrefix("/").Subrouter()
-	dataRoutes.HandleFunc("/import-xtb", datacenter.ImportXTB).Methods("GET")
+	dataRoutes.HandleFunc("/import-xtb", datacenter.ImportXTB).Methods("POST")
 
 	r.PathPrefix("/").Handler(negroni.New(
 		negroni.HandlerFunc(checkAuth),

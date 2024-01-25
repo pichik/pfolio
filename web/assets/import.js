@@ -3,7 +3,7 @@ function importXTB() {
     const inputData = document.getElementById('inputData').value;
 
     // Send the data to your server (you can use fetch or XMLHttpRequest)
-    fetch('/import', {
+    fetch('/import-xtb', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
