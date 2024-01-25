@@ -1,6 +1,7 @@
 package datacenter
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -27,5 +28,22 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, cookie)
 	}
 
+	// Respond with JSON
+	response := map[string]interface{}{
+		"status":  "success",
+		"message": "Data received successfully",
+	}
+
+	// Convert the response map to JSON
+	responseJSON, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the Content-Type header to indicate JSON
+	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusOK)
+	w.Write(responseJSON)
 }
