@@ -31,27 +31,27 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// Convert the response map to JSON
-	responseJSON, err := json.Marshal(jsonData)
-	if err != nil {
-		http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
-		return
-	}
+	// responseJSON, err := json.Marshal(jsonData)
+	// if err != nil {
+	// 	http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
+	// 	return
+	// }
 
 	// Set the Content-Type header to indicate JSON
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(responseJSON)
+	w.Write(jsonData)
 }
 
-func csvToJSON(csvData string) (string, error) {
+func csvToJSON(csvData string) ([]byte, error) {
 	// Create a CSV reader from the CSV data
 	reader := csv.NewReader(strings.NewReader(csvData))
 
 	// Read all records from the CSV
 	records, err := reader.ReadAll()
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
 
 	// Create a slice to store the converted JSON data
@@ -72,8 +72,8 @@ func csvToJSON(csvData string) (string, error) {
 	// Convert JSON slice to JSON string
 	jsonBytes, err := json.Marshal(jsonData)
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
 
-	return string(jsonBytes), nil
+	return jsonBytes, nil
 }
