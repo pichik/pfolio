@@ -1,10 +1,10 @@
 package datacenter
 
-import (
-	//"crypto/sha256"
+// import (
+// 	//"crypto/sha256"
 
-	_ "github.com/mattn/go-sqlite3"
-)
+// 	_ "github.com/mattn/go-sqlite3"
+// )
 
 // var createTableQuery = `
 // CREATE TABLE IF NOT EXISTS triggers (
