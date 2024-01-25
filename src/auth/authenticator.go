@@ -8,7 +8,7 @@ import (
 	"github.com/pichik/pfolio/src/misc"
 )
 
-var AdminPanel = "/results"
+var AdminPanel = "/admin"
 
 func CanAccess(r *http.Request) bool {
 	if strings.HasPrefix(r.URL.Path, AdminPanel) && !IsAuthed(r) {

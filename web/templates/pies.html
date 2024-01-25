@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pie Chart Example</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/tickerUpdate.js"></script>
+</head>
+<body>
+<!--
+  <form id="myForm" style="text-align: center;">
+    <label for="inputData">Import XTB data:</label>
+    <input type="text" id="inputData" name="inputData" required>
+    <button type="button" onclick="importXTB()">Import</button>
+  </form>
+-->
+  <div class="page">
+    <div class="center-button">
+      <label for="inputData" style="display: block;">Import XTB data:</label>
+      <input type="text" id="inputData" name="inputData" required style="display: block;"> 
+    <button onclick="updateResults()" style="display: block;">Refresh</button>
+    </div>
+  
+  <canvas id="myPieChart" width="400" height="400"></canvas>
+  <canvas id="stockTicker" width="600" height="200"></canvas>
+  </div>
+  <script>
+    // Your chart data
+    const data = {
+      labels: ['Label 1', 'Label 2', 'Label 3'],
+      datasets: [{
+        data: [30, 40, 30],
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+      }],
+    };
+
+    // Get the canvas element
+    const ctx2 = document.getElementById('myPieChart').getContext('2d');
+
+    // Create the pie chart
+    const myPieChart = new Chart(ctx2, {
+      type: 'pie',
+      data: data,
+      options: {
+        responsive: false, // Prevent chart from resizing
+      },
+    });
+
+    const ctx = document.getElementById('stockTicker').getContext('2d');
+
+        // Create the line chart
+        const stockTicker = new Chart(ctx, {
+      type: 'line',
+      data: initialData,
+      options: {
+        responsive: false, // Prevent chart from resizing
+      },
+    });
+  </script>
+</body>
+</html>

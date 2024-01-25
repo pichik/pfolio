@@ -16,13 +16,10 @@ var DataDir string
 var CertDir string
 
 type ConfigData struct {
-	Hostname      string
-	Host          string
-	Token         string
-	Directory     string
-	CollectorPath string
-	SlackToken    string
-	SlackChannel  string
+	Hostname  string
+	Host      string
+	Token     string
+	Directory string
 }
 
 var Config ConfigData

@@ -1,9 +1,12 @@
-# Web Watcher  
-Golang server for testing blind XSS.   
-Special endpoint for testing requests and file extensions.  
+# Portfolio Tracker
+Track your investing portfolio
 
 ## Setup  
 1. Install  
+```
+go install github.com/pichik/pfolio@latest
+```
+or
 ```
 git clone https://github.com/pichik/pfolio
 ```
