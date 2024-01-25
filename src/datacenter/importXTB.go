@@ -1,41 +1,37 @@
 package datacenter
 
 import (
+	"encoding/csv"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
-	"time"
-
-	"github.com/pichik/pfolio/src/misc"
+	"strings"
 )
 
 func ImportXTB(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("IMPORTING XTB")
+	// Read the CSV data from the request body
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Error reading request body", http.StatusInternalServerError)
+		return
+	}
+	csvData := string(body)
 
-	refreshRate := r.URL.Query().Get("refresh")
-	refreshCookie, err := r.Cookie("refresh")
-	fmt.Println(refreshRate)
-
-	if refreshRate != "" && (err != nil || refreshCookie.Value != refreshRate) {
-		misc.DebugLog.Printf("[Adding refresh cookie] [%s]%s", r.Method, r.RequestURI)
-		cookie := &http.Cookie{
-			Name:     "refresh",
-			Value:    refreshRate,
-			HttpOnly: false,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().Add(365 * 24 * time.Hour),
-		}
-		http.SetCookie(w, cookie)
+	// Convert CSV to JSON
+	jsonData, err := csvToJSON(csvData)
+	if err != nil {
+		http.Error(w, "Error converting CSV to JSON", http.StatusInternalServerError)
+		return
 	}
 
 	// Respond with JSON
-	response := map[string]interface{}{
-		"status":  "success",
-		"message": "Data received successfully",
-	}
+	// response := map[string]interface{}{
+	// 	"status":  "success",
+	// 	"message": "Data received successfully",
+	// }
 
 	// Convert the response map to JSON
-	responseJSON, err := json.Marshal(response)
+	responseJSON, err := json.Marshal(jsonData)
 	if err != nil {
 		http.Error(w, "Error encoding JSON response", http.StatusInternalServerError)
 		return
@@ -46,4 +42,38 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(responseJSON)
+}
+
+func csvToJSON(csvData string) (string, error) {
+	// Create a CSV reader from the CSV data
+	reader := csv.NewReader(strings.NewReader(csvData))
+
+	// Read all records from the CSV
+	records, err := reader.ReadAll()
+	if err != nil {
+		return "", err
+	}
+
+	// Create a slice to store the converted JSON data
+	var jsonData []map[string]string
+
+	// Iterate through CSV records and convert to JSON
+	for _, record := range records {
+		jsonRecord := make(map[string]string)
+		for i, value := range record {
+			// Assuming the header row is present in the CSV,
+			// use the header as the JSON key
+			header := records[0][i]
+			jsonRecord[header] = value
+		}
+		jsonData = append(jsonData, jsonRecord)
+	}
+
+	// Convert JSON slice to JSON string
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonBytes), nil
 }
