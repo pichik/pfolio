@@ -20,11 +20,20 @@
     <div class="center-button">
       <label for="inputData" style="display: block;">Import XTB data:</label>
       <input type="text" id="inputData" name="inputData" required style="display: block;"> 
-    <button onclick="updateResults()" style="display: block;">Refresh</button>
+    <button onclick="importXTB()" style="display: block;">Import</button>
     </div>
-  
-  <canvas id="myPieChart" width="400" height="400"></canvas>
-  <canvas id="stockTicker" width="600" height="200"></canvas>
+    <br>
+    <br>
+    <br>
+    <div class="container">
+      <div class="left">
+        <canvas id="myPieChart" width="400" height="400"></canvas>
+      </div>
+      <div class="right">
+        <canvas id="stockTicker" width="600" height="200"></canvas>
+      </div>
+    </div>
+
   </div>
   <script>
     // Your chart data

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/pichik/pfolio/src/auth"
+	"github.com/pichik/pfolio/src/datacenter"
 	"github.com/pichik/pfolio/src/misc"
 
 	"github.com/gorilla/mux"
@@ -44,9 +45,9 @@ func setHeaders(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 }
 
 func checkAuth(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if !auth.IsAuthed(r) {
-		return
-	}
+	// if !auth.IsAuthed(r) {
+	// 	return
+	// }
 	next(w, r)
 }
 func login(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
@@ -62,7 +63,7 @@ func main() {
 	n.Use(negroni.NewStatic(http.Dir(misc.AssetsDir)))
 	n.UseFunc(setHeaders)
 
-	setupAdminRoutes(r)
+	setupDataRoutes(r)
 
 	r.PathPrefix("/login").Handler(negroni.New(
 		negroni.HandlerFunc(auth.Authenticate),
@@ -76,17 +77,13 @@ func main() {
 	log.Fatal(server.ListenAndServeTLS("", ""))
 }
 
-func setupAdminRoutes(r *mux.Router) {
-	adminRoutes := mux.NewRouter().PathPrefix(auth.AdminPanel).Subrouter()
-	// adminRoutes.HandleFunc("/{id:[a-zA-Z0-9]{64}}", harvester.Extract).Methods("GET")
-	// adminRoutes.HandleFunc("/{id:[a-zA-Z0-9]{64}}", harvester.Delete).Methods("DELETE")
-	// adminRoutes.HandleFunc("/all", harvester.ExtractAll).Methods("GET")
-	// adminRoutes.HandleFunc("/all", harvester.UpdateAll).Methods("POST")
-	// adminRoutes.HandleFunc("/all", harvester.DeleteAll).Methods("DELETE")
+func setupDataRoutes(r *mux.Router) {
+	dataRoutes := mux.NewRouter().PathPrefix("/").Subrouter()
+	dataRoutes.HandleFunc("/import-xtb", datacenter.ImportXTB).Methods("GET")
 
-	r.PathPrefix(auth.AdminPanel).Handler(negroni.New(
+	r.PathPrefix("/").Handler(negroni.New(
 		negroni.HandlerFunc(checkAuth),
-		negroni.Wrap(adminRoutes),
+		negroni.Wrap(dataRoutes),
 	))
 }
 
