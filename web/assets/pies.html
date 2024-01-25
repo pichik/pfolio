@@ -10,17 +10,12 @@
   <script src="/tickerUpdate.js"></script>
 </head>
 <body>
-<!--
-  <form id="myForm" style="text-align: center;">
-    <label for="inputData">Import XTB data:</label>
-    <input type="text" id="inputData" name="inputData" required>
-    <button type="button" onclick="importXTB()">Import</button>
-  </form>
--->
+
   <div class="page">
     <div class="center-button">
       <label for="inputData" style="display: block;">Import XTB data:</label>
       <input type="text" id="inputData" name="inputData" required style="display: block;"> 
+      <input type="file" id="fileInput" accept="text/csv">
     <button onclick="importXTB()" style="display: block;">Import</button>
     </div>
     <br>
