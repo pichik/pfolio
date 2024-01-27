@@ -1,138 +1,72 @@
-package datacenter
+package data
 
-// import (
-// 	//"crypto/sha256"
+import (
+	//"crypto/sha256"
 
-// 	_ "github.com/mattn/go-sqlite3"
-// )
+	"database/sql"
+	"encoding/json"
+	"fmt"
 
-// var createTableQuery = `
-// CREATE TABLE IF NOT EXISTS triggers (
-// Location TEXT,
-// Cookies TEXT,
-// Referrer TEXT,
-// UserAgent TEXT,
-// BrowserTime TEXT,
-// Origin TEXT,
-// DOM TEXT,
-// IP TEXT,
-// Method TEXT,
-// Screenshot TEXT,
-// HASH TEXT,
-// Collection TEXT,
-// Timestamp INTEGER,
-// Visible INTEGER
-// );
-// `
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/pichik/pfolio/src/misc"
+)
 
-// var insertQuery = `
-//   INSERT INTO triggers (
-//     Location,
-//     Cookies,
-//     Referrer,
-//     UserAgent,
-//     BrowserTime,
-//     Origin,
-//     DOM,
-//     IP,
-//     Method,
-//     Screenshot,
-//     HASH,
-//     Collection,
-//     Timestamp,
-//     Visible
-//   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-// `
+var readQuery = `
+  		SELECT * FROM triggers
+  		WHERE Ticker = ?;
+  	`
 
-// var removeQuery = `
-//   		DELETE FROM triggers
-//       WHERE HASH = ?;
-//   	`
+var db *sql.DB
 
-// var readQuery = `
-//   		SELECT * FROM triggers
-//   		WHERE Visible = 1 AND Timestamp > ?;
-//   	`
+var dataPath string = misc.DataDir + "/" + "data"
 
-// var dataPath string = misc.DataDir + "/" + "data"
+func ReadDatabase() {
+	// Query the data from the table
 
-// func CreateDatabase() {
-// 	db := opendb()
-// 	defer db.Close()
+	rows, err := db.Query(readQuery)
+	if err != nil {
+		fmt.Printf("Error querying database: %s", err)
+	}
+	defer rows.Close()
 
-// 	_, err := db.Exec(createTableQuery)
-// 	if err != nil {
-// 		misc.ErrorLog.Printf("Error creating table in database: %s", err)
-// 	}
-// }
+	for rows.Next() {
 
-// func saveNewData(data *Data) {
-// 	db := opendb()
-// 	defer db.Close()
+		var hourlyPricesJSON string
+		stock := Stock{}
+		err := rows.Scan(
+			&stock.Ticker,
+			&stock.LastPrice,
+			&hourlyPricesJSON,
+		)
 
-// 	_, err := db.Exec(insertQuery, data.Location, data.Cookies, data.Referrer, data.UserAgent, data.BrowserTime, data.Origin, data.DOM, data.IP, data.Method, data.Screenshot, data.HASH, data.Collection, data.Timestamp, 1)
-// 	if err != nil {
-// 		misc.ErrorLog.Printf("Error inserting data into database: %s", err)
-// 	}
-// }
+		//If LastPrice is null it means data were not filled yet
+		if err != nil {
+			AllStocks[stock.Ticker] = stock
+			return
+		}
+		// Unmarshal the JSON string into a map
+		var hourlyPrices map[int]float64
+		if err := json.Unmarshal([]byte(hourlyPricesJSON), &hourlyPrices); err != nil {
+			fmt.Printf("Error unmarshaling hourlyPrices JSON: %s", err)
+			continue
+		}
+		stock.HourlyPrices = hourlyPrices
+		fmt.Println("JSON: ", hourlyPrices)
 
-// func readData(timestamp string) []*Data {
-// 	db := opendb()
-// 	defer db.Close()
+		AllStocks[stock.Ticker] = stock
 
-// 	// Query the data from the table
-// 	rows, err := db.Query(readQuery, timestamp)
-// 	if err != nil {
-// 		misc.ErrorLog.Printf("Error querying database: %s", err)
-// 	}
-// 	defer rows.Close()
+	}
 
-// 	var collection []*Data
+	if err := rows.Err(); err != nil {
+		fmt.Printf("Error retrieving database row: %s", err)
+	}
+}
 
-// 	for rows.Next() {
-// 		data := &Data{}
-// 		err := rows.Scan(
-// 			&data.Location,
-// 			&data.Cookies,
-// 			&data.Referrer,
-// 			&data.UserAgent,
-// 			&data.BrowserTime,
-// 			&data.Origin,
-// 			&data.DOM,
-// 			&data.IP,
-// 			&data.Method,
-// 			&data.Screenshot,
-// 			&data.HASH,
-// 			&data.Collection,
-// 			&data.Timestamp,
-// 			&data.Visible,
-// 		)
-// 		if err != nil {
-// 			misc.ErrorLog.Printf("Error scanning database row: %s", err)
-// 		}
-// 		collection = append([]*Data{data}, collection...)
-// 	}
+func Opendb(database string) *sql.DB {
 
-// 	if err := rows.Err(); err != nil {
-// 		misc.ErrorLog.Printf("Error retrieving database row: %s", err)
-// 	}
-// 	return collection
-// }
-
-// func removeData(hash string) {
-// 	db := opendb()
-// 	defer db.Close()
-
-// 	_, err := db.Exec(removeQuery, hash)
-// 	if err != nil {
-// 		misc.ErrorLog.Printf("Error deleting data: %s", err)
-// 	}
-// }
-
-// func opendb() *sql.DB {
-// 	db, err := sql.Open("sqlite3", misc.DataDir+"/"+"wwdatabase.db")
-// 	if err != nil {
-// 		misc.ErrorLog.Printf("Error opening database: %s", err)
-// 	}
-// 	return db
-// }
+	db, err := sql.Open("sqlite3", database)
+	if err != nil {
+		misc.ErrorLog.Printf("Error opening database: %s", err)
+	}
+	return db
+}

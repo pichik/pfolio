@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/pichik/pfolio/src/auth"
-	"github.com/pichik/pfolio/src/datacenter"
+	"github.com/pichik/pfolio/src/data"
 	"github.com/pichik/pfolio/src/misc"
 
 	"github.com/gorilla/mux"
@@ -56,6 +56,7 @@ func login(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 func main() {
 	loadFiles()
+	data.Opendb("stockdata.db")
 
 	r := mux.NewRouter()
 	n := negroni.Classic()
@@ -79,7 +80,7 @@ func main() {
 
 func setupDataRoutes(r *mux.Router) {
 	dataRoutes := mux.NewRouter().PathPrefix("/").Subrouter()
-	dataRoutes.HandleFunc("/import-xtb", datacenter.ImportXTB).Methods("POST")
+	dataRoutes.HandleFunc("/import-xtb", data.ImportXTB).Methods("POST")
 
 	r.PathPrefix("/").Handler(negroni.New(
 		negroni.HandlerFunc(checkAuth),
