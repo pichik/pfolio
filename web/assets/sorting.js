@@ -122,7 +122,7 @@ function getPercentageValue(cell) {
   var percentageMatch = textContent.match(/(\d+(\.\d+)?%)/)[0]; // Match the percentage value
 
   if (percentageMatch) {
-    return parseFloat(percentageMatch[0]); // Parse the matched percentage value as float
+    return parseFloat(percentageMatch); // Parse the matched percentage value as float
   } else {
     return NaN; // Return NaN if no percentage value found
   }

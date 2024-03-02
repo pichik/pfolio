@@ -89,11 +89,11 @@
 
 
 
-      document.getElementById(`portfolio-value`).innerHTML=`Portfolio Value: ${valueTotal}`;
-      document.getElementById(`portfolio-invested`).innerHTML=`Invested: ${investedTotal}`;
-      document.getElementById(`portfolio-profit`).innerHTML=`Profit: ${diffTotal.value} (${diffTotal.percent})`;
+      document.getElementById(`portfolio-value`).innerHTML=`Portfolio Value: ${valueTotal}${currentCurrency.Symbol}`;
+      document.getElementById(`portfolio-invested`).innerHTML=`Invested: ${investedTotal}${currentCurrency.Symbol}`;
+      document.getElementById(`portfolio-profit`).innerHTML=`Profit: ${diffTotal.value}${currentCurrency.Symbol} (${diffTotal.percent})`;
       document.getElementById(`portfolio-profit`).style.color= diffTotal.color;
-      document.getElementById(`portfolio-dividend`).innerHTML=`Dividends: ${dividendTotal}`;
+      document.getElementById(`portfolio-dividend`).innerHTML=`Dividends: ${dividendTotal}${currentCurrency.Symbol}`;
 
       if (dividendTotal>0){
       diffTotalWithDivs = GetDifference(investedTotal, valueTotal+dividendTotal);

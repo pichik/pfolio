@@ -21,6 +21,10 @@ function GetData(){
             if (eurPfolio.length > 0 && usdPfolio.length > 0){
                 allPfolio = ChangePfolioCurrency(allPfolio)
                 document.getElementById('currency-btn').style.visibility = 'visible';
+            }else if (eurPfolio.length > 0){
+                currentCurrency=Currency.EUR
+            }else if (usdPfolio.length > 0){
+                currentCurrency=Currency.USD
             }
 
             return {allPfolio,wList}

@@ -3,15 +3,15 @@ var UsdToEur;
 var EurToUsd;
 
 const Currency={
-    USD:"USD",
-    EUR:"EUR"
+    USD:{Name:"USD",Symbol:"$"},
+    EUR:{Name:"EUR",Symbol:"€"}
 }
 
 var currentCurrency=Currency.USD;
 
 function ChangeCurrency(){
     currentCurrency = currentCurrency == Currency.USD ? Currency.EUR : Currency.USD;
-    document.getElementById('currency-btn').innerHTML = currentCurrency == Currency.USD ? '$' : '€';
+    document.getElementById('currency-btn').innerHTML = currentCurrency.Symbol;
     UpdateStockData()
 }
 

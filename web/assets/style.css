@@ -57,6 +57,10 @@ width: 50%;
 padding-left: 2%;
 }
 
+[onclick] {
+  cursor: pointer;
+}
+
 
 #wlistTable th,
 #wlistTable td,
