@@ -1,4 +1,4 @@
-package data
+package request
 
 import (
 	//"crypto/sha256"
@@ -8,17 +8,15 @@ import (
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/pichik/pfolio/src/data"
 	"github.com/pichik/pfolio/src/misc"
 )
 
 var readQuery = `
-  		SELECT * FROM triggers
-  		WHERE Ticker = ?;
+  		SELECT * FROM stocks;
   	`
 
 var db *sql.DB
-
-var dataPath string = misc.DataDir + "/" + "data"
 
 func ReadDatabase() {
 	// Query the data from the table
@@ -32,29 +30,39 @@ func ReadDatabase() {
 	for rows.Next() {
 
 		var hourlyPricesJSON string
-		stock := Stock{}
+		var dailyPricesJSON string
+		stock := data.Stock{}
 		err := rows.Scan(
 			&stock.Ticker,
 			&stock.LastPrice,
+			&stock.LastPriceStr,
 			&hourlyPricesJSON,
+			&dailyPricesJSON,
 		)
 
 		//If LastPrice is null it means data were not filled yet
 		if err != nil {
-			AllStocks[stock.Ticker] = stock
+			data.AllStocks[stock.Ticker] = stock
 			return
 		}
 		// Unmarshal the JSON string into a map
+		// Unmarshal the JSON string into a map
 		var hourlyPrices map[int]float64
 		if err := json.Unmarshal([]byte(hourlyPricesJSON), &hourlyPrices); err != nil {
-			fmt.Printf("Error unmarshaling hourlyPrices JSON: %s", err)
-			continue
+			data.AllStocks[stock.Ticker] = stock
+			return
 		}
 		stock.HourlyPrices = hourlyPrices
-		fmt.Println("JSON: ", hourlyPrices)
 
-		AllStocks[stock.Ticker] = stock
+		// Unmarshal the JSON string into a map
+		var dailyPrices map[int]float64
+		if err := json.Unmarshal([]byte(dailyPricesJSON), &dailyPrices); err != nil {
+			data.AllStocks[stock.Ticker] = stock
+			return
+		}
+		stock.DailyPrices = dailyPrices
 
+		data.AllStocks[stock.Ticker] = stock
 	}
 
 	if err := rows.Err(); err != nil {
@@ -62,11 +70,10 @@ func ReadDatabase() {
 	}
 }
 
-func Opendb(database string) *sql.DB {
-
-	db, err := sql.Open("sqlite3", database)
+func Opendb(database string) {
+	var err error
+	db, err = sql.Open("sqlite3", database)
 	if err != nil {
 		misc.ErrorLog.Printf("Error opening database: %s", err)
 	}
-	return db
 }

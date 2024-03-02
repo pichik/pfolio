@@ -72,7 +72,7 @@ func JsonToStockDataList(jsonData []byte) ([]data.XTBStockData, error) {
 			ID:      fmt.Sprintf("%.0f", record["ID"].(float64)),
 			Type:    record["Type"].(string),
 			Time:    record["Time"].(string),
-			Symbol:  record["Symbol"].(string),
+			Symbol:  strings.Split(record["Symbol"].(string), ".")[0],
 			Comment: record["Comment"].(string),
 			Amount:  record["Amount"].(float64),
 		}

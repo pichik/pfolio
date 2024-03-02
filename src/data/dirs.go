@@ -1,4 +1,4 @@
-package misc
+package data
 
 import (
 	"encoding/json"
@@ -29,13 +29,11 @@ func init() {
 
 	if err != nil {
 		panic(err)
-		os.Exit(1)
 	}
 
 	err = json.Unmarshal(file, &Config)
 	if err != nil {
 		panic(err)
-		os.Exit(1)
 	}
 
 	Config.Host = "https://" + Config.Hostname

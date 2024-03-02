@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pichik/pfolio/src/misc"
+	"github.com/pichik/pfolio/src/data"
 )
 
 var AdminPanel = "/admin"
@@ -22,17 +22,17 @@ func IsAuthed(r *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	if token.Value != misc.Config.Token {
+	if token.Value != data.Config.Token {
 		return false
 	}
 	return true
 }
 
 func Authenticate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	if r.URL.Query().Get("token") == misc.Config.Token {
+	if r.URL.Query().Get("token") == data.Config.Token {
 		cookie := &http.Cookie{
 			Name:     "token",
-			Value:    misc.Config.Token,
+			Value:    data.Config.Token,
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 			Expires:  time.Now().Add(365 * 24 * time.Hour),

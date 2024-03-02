@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio tracker</title>
+<link rel="stylesheet" type="text/css" href="/style.css">
+<!-- Include Chart.js library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
+<script src="/updates/pfolio.js"></script>
+<script src="/updates/watchlist.js"></script>
+<script src="/requests/update.js"></script>
+<script src="/requests/import.js"></script>
+<script src="/charts.js"></script>
+<script src="/currency.js"></script>
+<script src="/stuff.js"></script>
+
+</head>
+<body style="min-height: 200vh;">
+  <div class="page">
+    <div class="center-button">
+      <label for="inputData" style="display: block;">Import XTB csv file:</label>
+      <input type="file" id="xtb-file" accept="text/csv">
+      <select id="xtb-currency">
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <button onclick="importXTB()" style="display: block;">Import</button>
+      <br>
+      <div style="display: flex; justify-content: center;">
+        <button id="currency-btn" onclick="ChangeCurrency()" style="visibility:hidden; width: fit-content;font-size: 80px;padding:0px 15px">$</button>
+      </div>
+    </div>
+    <br>
+    <div id="investedTotal" style="text-align: center;">
+      <div style="text-align: center;">
+        <h3 id="portfolio-value">Portfolio Value: </h3>
+        <h3 id="portfolio-invested">Invested: </h3>
+        <h4 id="portfolio-profit">Profit: </h4>
+        <h5 id="portfolio-dividend" style="color:green;">Dividends: </h4>
+        <h5 id="portfolio-profit-dividends" style="margin-top: -20px;"></h5>
+      </div>
+    </div>
+    <canvas id="piechart-total"  height="500" style="display: block; margin: -100px auto;"></canvas>
+    <canvas id="barchart-total"  height="500"  style="width: 100%;" ></canvas>
+    <br>
+    <br>
+    <div class="center-button">
+      <div id="wlist-inputs" style="visibility:hidden;">
+        <input id="wlist-stock" type="text" style="display: inline-block;">
+        <button onclick="importWlistStocks()" style="display: inline-block;padding:5px 10px">Add to Watchlist</button>
+      </div>
+      <button id="sectionSwitcher" onclick="SwitchSections()" style="display: block">Portfolio</button>
+    <br>
+      <input class="center-button" type="text" id="searchTable" placeholder="Search ticker..." style="width: 40%;margin-bottom: 10px;">
+    </div>
+    <div class="container">
+      <div id="pfolio" style="width: 100%;">
+        <table id="pfolioTable" style="width: 100%;text-align: center;">
+            <thead style="color:yellow">
+              <tr>
+                <th onclick="sortTable('pfolioTable', 0)">Ticker</th>
+                <th onclick="sortPercentTable('pfolioTable', 2)" style="width: 40%;">Last 10 Days</th>
+                <th></th>
+                <th onclick="sortTable('pfolioTable', 3)">Current Price</th>
+                <th onclick="sortTable('pfolioTable', 4)">Buy Price</th>
+                <th onclick="sortTable('pfolioTable', 5)">Stock Amount</th>
+                <th onclick="sortTable('pfolioTable', 6)">Invested</th>
+                <th onclick="sortTable('pfolioTable', 7)">Profit</th>
+                <th onclick="sortTable('pfolioTable', 8)">%</th>
+                <th onclick="sortTable('pfolioTable', 9)">Dividends</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+      </div>
+      <div id="watchlist" style="width: 100%">
+        <table id="wlistTable" style="width: 100%;text-align: center;">
+            <thead style="color:yellow">
+              <tr>
+                <th onclick="sortTable('wlistTable', 0)">Ticker</th>
+                <th onclick="sortPercentTable('wlistTable', 2)" style="width: 75%;">Last 10 Days</th>
+                <th></th>
+                <th onclick="sortTable('wlistTable', 3)">Current Price</th>
+              </tr>
+            </thead>
+            <tbody id="watchlistTable">
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // CreateTable()
+  CreateStockTables()
+
+  setInterval(UpdateStockData,30000);
+ 
+  createBarChart(`barchart-total`, [0])
+  createPieChart(`piechart-total`, [0])
+
+
+
+</script>
+
+
+<script src="/sorting.js"></script>
+</body>
+</html>

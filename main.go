@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pichik/pfolio/src/auth"
 	"github.com/pichik/pfolio/src/data"
 	"github.com/pichik/pfolio/src/misc"
+	request "github.com/pichik/pfolio/src/requests"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -56,12 +58,13 @@ func login(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 func main() {
 	loadFiles()
-	data.Opendb("stockdata.db")
+	request.Opendb(data.DataDir + "stockdata.db")
+	go UpdateStocks()
 
 	r := mux.NewRouter()
 	n := negroni.Classic()
 
-	n.Use(negroni.NewStatic(http.Dir(misc.AssetsDir)))
+	n.Use(negroni.NewStatic(http.Dir(data.AssetsDir)))
 	n.UseFunc(setHeaders)
 
 	setupDataRoutes(r)
@@ -80,7 +83,9 @@ func main() {
 
 func setupDataRoutes(r *mux.Router) {
 	dataRoutes := mux.NewRouter().PathPrefix("/").Subrouter()
-	dataRoutes.HandleFunc("/import-xtb", data.ImportXTB).Methods("POST")
+	dataRoutes.HandleFunc("/import-xtb", request.ImportXTB).Methods("POST")
+	dataRoutes.HandleFunc("/add-to-wlist", request.ImportWlist).Methods("POST")
+	dataRoutes.HandleFunc("/stock-update", request.StocksUpdate).Methods("GET")
 
 	r.PathPrefix("/").Handler(negroni.New(
 		negroni.HandlerFunc(checkAuth),
@@ -91,8 +96,8 @@ func setupDataRoutes(r *mux.Router) {
 func setupServer(n *negroni.Negroni) (*http.Server, autocert.Manager) {
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(misc.Config.Hostname, "www."+misc.Config.Hostname),
-		Cache:      autocert.DirCache(misc.CertDir),
+		HostPolicy: autocert.HostWhitelist("pfolio." + data.Config.Hostname),
+		Cache:      autocert.DirCache(data.CertDir),
 	}
 
 	server := &http.Server{
@@ -106,4 +111,19 @@ func setupServer(n *negroni.Negroni) (*http.Server, autocert.Manager) {
 func loadFiles() {
 	misc.ImportLogs()
 	//datacenter.CreateDatabase()
+}
+
+func UpdateStocks() {
+	ticker30Sec := time.NewTicker(3 * time.Second)
+	ticker24Hours := time.NewTicker(24 * time.Hour)
+	request.UpdateEchangeRates()
+	for {
+		select {
+		case <-ticker30Sec.C:
+			request.ReadDatabase()
+
+		case <-ticker24Hours.C:
+			request.UpdateEchangeRates()
+		}
+	}
 }

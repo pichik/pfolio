@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pichik/pfolio/src/data"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,21 +15,21 @@ var ErrorLog = log.New()
 var DebugLog = log.New()
 
 func ImportLogs() {
-	os.MkdirAll(LogsDir, 0770)
+	os.MkdirAll(data.LogsDir, 0770)
 
-	fh, err := os.OpenFile(LogsDir+"errors.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
+	fh, err := os.OpenFile(data.LogsDir+"errors.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
 
 	ErrorLog.SetOutput(fh)
 	ErrorLog.SetFormatter(&LogFormatter{})
 
-	fh, err = os.OpenFile(LogsDir+"requests.txt", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0770)
+	fh, err = os.OpenFile(data.LogsDir+"requests.txt", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0770)
 	if err != nil {
 		ErrorLog.Printf("%s", err)
 	}
 	RequestLog.SetOutput(fh)
 	RequestLog.SetFormatter(&LogFormatter{})
 
-	fh, err = os.OpenFile(LogsDir+"debug.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
+	fh, err = os.OpenFile(data.LogsDir+"debug.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0770)
 	if err != nil {
 		ErrorLog.Printf("%s", err)
 	}

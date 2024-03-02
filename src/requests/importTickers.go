@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
-
-	"github.com/pichik/pfolio/src/data"
 )
 
 var tickerDbUrl = "http://localhost:8081/addticker"
@@ -25,11 +23,4 @@ func sendTickers(tickers string) {
 		fmt.Println("Error:", resp.Status)
 		return
 	}
-
-	fmt.Println("Tickers added successfully.")
-
-}
-
-func receiveStocks() {
-	data.ReadDatabase()
 }

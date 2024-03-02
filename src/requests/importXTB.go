@@ -1,11 +1,11 @@
 package request
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/pichik/pfolio/src/data"
 	"github.com/pichik/pfolio/src/misc"
@@ -13,26 +13,25 @@ import (
 
 func ImportXTB(w http.ResponseWriter, r *http.Request) {
 
-	// Get the multipart reader from the request
-	reader, err := r.MultipartReader()
+	// Parse the multipart form
+	err := r.ParseMultipartForm(10 << 20) // 10 MB max size
 	if err != nil {
-		http.Error(w, "Error getting multipart reader", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error parsing multipart form: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	// Read the first part of the multipart request
-	part, err := reader.NextPart()
+	// Retrieve the form values
+	currency := r.FormValue("xtb-currency")
+
+	file, _, err := r.FormFile("xtb-file")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading part: %v", err), http.StatusInternalServerError)
 		return
 	}
+	defer file.Close()
 
-	// Check if the part is a file
-	if part.FileName() == "" {
-		return
-	}
 	// Read the file content
-	body, err := io.ReadAll(part)
+	body, err := io.ReadAll(file)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error reading file content: %v", err), http.StatusInternalServerError)
 		return
@@ -40,51 +39,116 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 
 	csvData := string(body)
 
-	// Convert CSV to JSON
-	jsonData, err := misc.CsvToJSON(csvData)
-	if err != nil {
+	tck, pf := GetPortfolio(csvData)
 
-		http.Error(w, fmt.Sprintf("Error converting CSV to JSON [%s]", err), http.StatusInternalServerError)
-		return
+	sendTickers(tck)
+
+	cookie := &http.Cookie{
+		Name:   "XTB-" + currency,
+		Value:  pf,
+		MaxAge: 365 * 24 * 60 * 60, // 1 year in seconds
 	}
-
-	// Convert JSON to StockData
-	stockDataList, err := misc.JsonToStockDataList(jsonData)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error converting JSON to StockData [%s]", err), http.StatusInternalServerError)
-		return
-	}
-
-	portfolio := calculateTickers(stockDataList)
-
-	var tickers string
-	for t, _ := range portfolio {
-		tickers = tickers + t + " "
-	}
-
-	sendTickers(tickers)
-
-	// Convert stockDataList to JSON
-	jsonResponse, err := json.Marshal(data.AllStocks)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error converting StockDataList to JSON [%s]", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Set the Content-Type header to indicate JSON
-	w.Header().Set("Content-Type", "application/json")
-
+	// Set the cookie in the response
+	http.SetCookie(w, cookie)
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonResponse)
 }
 
-func calculateTickers(portfolioData []XTBStockData) map[string]float64 {
-	var tickers = map[string]float64{}
+func GetPortfolio(input string) (string, string) {
+	lines := strings.Split(input, "\n")
+	result := make(map[string]data.OwnedStock)
 
-	for _, data := range portfolioData {
-		if data.Symbol != "" {
-			tickers[data.Symbol] += math.Abs(data.Amount)
+	for _, line := range lines {
+
+		ownedStockData := data.OwnedStock{}
+
+		if strings.Contains(line, "OPEN") {
+			fields := strings.Split(line, ";")
+			// time := fields[0]
+			ticker := fields[3]
+			priceStr := strings.Split(fields[4], " ")[4]
+
+			quantityStr := strings.Split(strings.Split(fields[4], " ")[2], "/")[0]
+
+			quantity, err := strconv.ParseFloat(quantityStr, 64)
+			if err != nil {
+				misc.ErrorLog.Printf("Error quantity parsing:  %s", err)
+				continue
+			}
+			price, err := strconv.ParseFloat(priceStr, 64)
+			if err != nil {
+				misc.ErrorLog.Printf("Error amount parsing:  %s", err)
+				continue
+			}
+
+			//calculate average price if there is higher quantity
+			if val, ok := result[ticker]; ok {
+				ownedStockData.BuyAmount = val.BuyAmount + quantity
+				ownedStockData.BuyPrice = ((val.BuyAmount * val.BuyPrice) + (quantity * price)) / (val.BuyAmount + quantity)
+				ownedStockData.Dividend = val.Dividend
+
+			} else {
+				ownedStockData.BuyAmount = quantity
+				ownedStockData.BuyPrice = price
+			}
+			result[ticker] = ownedStockData
+
+		} else if strings.Contains(line, "Dividend") {
+			fields := strings.Split(line, ";")
+			ticker := fields[3]
+
+			dividendStr := fields[5]
+
+			dividend, err := strconv.ParseFloat(strings.TrimSuffix(dividendStr, "\r"), 64)
+			if err != nil {
+				misc.ErrorLog.Printf("Error dividend parsing:  %s", err)
+				continue
+			}
+			if val, ok := result[ticker]; ok {
+
+				ownedStockData.BuyAmount = val.BuyAmount
+				ownedStockData.BuyPrice = val.BuyPrice
+				ownedStockData.Dividend = val.Dividend + dividend
+
+			} else {
+				ownedStockData.Dividend = dividend
+			}
+			result[ticker] = ownedStockData
 		}
 	}
-	return tickers
+
+	var tck string
+	var ptf string
+
+	for k, v := range result {
+		tck = tck + k + " "
+		ptf = ptf + fmt.Sprintf("%s:%f:%f:%f/", k, v.BuyAmount, v.BuyPrice, v.Dividend)
+	}
+
+	return tck, ptf
 }
+
+// func CheckClosedStocks(lines []string) {
+
+// 	for _, line := range lines {
+// 		if strings.Contains(line, "CLOSED") {
+// 			fields := strings.Split(line, ";")
+// 			// time := fields[0]
+// 			ticker := fields[3]
+// 			priceStr := strings.Split(fields[4], " ")[4]
+
+// 			quantityStr := strings.Split(strings.Split(fields[4], " ")[2], "/")[0]
+
+// 			quantity, err := strconv.ParseFloat(quantityStr, 64)
+// 			if err != nil {
+// 				misc.ErrorLog.Printf("Error quantity parsing:  %s", err)
+// 				continue
+// 			}
+// 			price, err := strconv.ParseFloat(priceStr, 64)
+// 			if err != nil {
+// 				misc.ErrorLog.Printf("Error amount parsing:  %s", err)
+// 				continue
+// 			}
+// 		}
+// 	}
+
+// }
