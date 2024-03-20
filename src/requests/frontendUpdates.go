@@ -2,11 +2,14 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/pichik/pfolio/src/data"
+	"github.com/pichik/pfolio/src/database"
+	"github.com/pichik/pfolio/src/misc"
 )
 
 func StocksUpdate(w http.ResponseWriter, r *http.Request) {
@@ -20,19 +23,15 @@ func StocksUpdate(w http.ResponseWriter, r *http.Request) {
 		"EurToUsd": EurToUsd,
 	}
 
-	xtbEurCookie, _ := r.Cookie("XTB-EUR")
-
-	if xtbEurCookie != nil {
-		xtbeur := CookiesToPortfolio(xtbEurCookie.Value)
-		response["xtb_eur"] = xtbeur
+	username, err := r.Cookie("username")
+	if err != nil {
+		fmt.Println("Cookie not found:", err)
+		return
 	}
+	usd, eur := database.ReadPfolio(username.Value)
 
-	xtbUsdCookie, _ := r.Cookie("XTB-USD")
-
-	if xtbUsdCookie != nil {
-		xtbusd := CookiesToPortfolio(xtbUsdCookie.Value)
-		response["xtb_usd"] = xtbusd
-	}
+	response["xtb_usd"] = AddStockData(GetPortfolio(usd))
+	response["xtb_eur"] = AddStockData(GetPortfolio(eur))
 
 	wListCookie, _ := r.Cookie("wList")
 
@@ -51,49 +50,103 @@ func StocksUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
-func CookiesToPortfolio(cookie string) []data.OwnedStock {
-	trimmed := strings.TrimSuffix(cookie, "/")
-	stockEntries := strings.Split(trimmed, "/")
-
-	var ownedStocks []data.OwnedStock
-
-	// Iterate over each stock entry
-	for _, entry := range stockEntries {
-		// Split each entry by colon to separate ticker and price
-		parts := strings.Split(entry, ":")
-
-		ticker := parts[0]
-		amount, err := strconv.ParseFloat(parts[1], 64)
-		if err != nil {
-			return nil
+func AddStockData(stocks map[string]data.OwnedStock) []data.OwnedStock {
+	var list []data.OwnedStock
+	for t, v := range stocks {
+		if val, ok := data.AllStocks[strings.Split(t, ".")[0]]; ok {
+			v.Stock = val
 		}
+		list = append(list, v)
+	}
+	return list
+}
 
-		price, err := strconv.ParseFloat(parts[2], 64)
-		if err != nil {
-			return nil
+func GetPortfolio(xtbcsv []data.XTB_CSV) map[string]data.OwnedStock {
+	// lines := strings.Split(input, "\n")
+	result := make(map[string]data.OwnedStock)
+
+	//Get previous line for dividend tax
+
+	for _, line := range xtbcsv {
+
+		if strings.Contains(line.Type, "purchase") {
+			GetPurchases(line, &result)
+		} else if strings.Contains(line.Type, "Dividend") {
+			var taxl data.XTB_CSV
+			for _, taxline := range xtbcsv {
+				if taxline.ID == line.ID+1 {
+					taxl = taxline
+					break
+				}
+			}
+			GetDividends(line, taxl, &result)
 		}
-
-		dividend, err := strconv.ParseFloat(parts[3], 64)
-		if err != nil {
-			return nil
-		}
-
-		// Create OwnedStock struct and append to slice
-		ownedStock := data.OwnedStock{
-			Ticker:    ticker,
-			BuyPrice:  price,
-			BuyAmount: amount,
-			Dividend:  dividend,
-		}
-
-		if val, ok := data.AllStocks[strings.Split(ticker, ".")[0]]; ok {
-			ownedStock.Stock = val
-		}
-		ownedStocks = append(ownedStocks, ownedStock)
-
 	}
 
-	return ownedStocks
+	return result
+}
+
+func GetPurchases(line data.XTB_CSV, result *map[string]data.OwnedStock) {
+	priceStr := strings.Split(line.Comment, " ")[4]
+	quantityStr := strings.Split(strings.Split(line.Comment, " ")[2], "/")[0]
+
+	quantity, err := strconv.ParseFloat(quantityStr, 64)
+	if err != nil {
+		misc.ErrorLog.Printf("Error quantity parsing:  %s", err)
+		return
+	}
+	price, err := strconv.ParseFloat(priceStr, 64)
+	if err != nil {
+		misc.ErrorLog.Printf("Error amount parsing:  %s", err)
+		return
+	}
+
+	purchaseData := data.PurchaseData{
+		Timestamp: getTimeStamp(line.Time),
+		Quantity:  quantity,
+		Price:     price,
+	}
+
+	ownedStock := (*result)[line.Symbol]
+
+	ownedStock.Ticker = line.Symbol
+	ownedStock.BuyPrice = ((ownedStock.BuyAmount * ownedStock.BuyPrice) + (quantity * price)) / (ownedStock.BuyAmount + quantity)
+	ownedStock.BuyAmount += quantity
+
+	if ownedStock.Purchases == nil {
+		ownedStock.Purchases = []data.PurchaseData{}
+	}
+
+	ownedStock.Purchases = append(ownedStock.Purchases, purchaseData)
+	(*result)[line.Symbol] = ownedStock
+
+}
+
+func GetDividends(line data.XTB_CSV, taxline data.XTB_CSV, result *map[string]data.OwnedStock) {
+
+	tax := 0.0
+	if taxline.Type == "Withholding tax" {
+		tax = taxline.Amount
+	}
+
+	dividendData := data.DividendData{
+		Timestamp:   getTimeStamp(line.Time),
+		Payout:      line.Amount,
+		Tax:         tax,
+		TaxedPayout: line.Amount + tax,
+	}
+
+	ownedStock := (*result)[line.Symbol]
+	ownedStock.Ticker = line.Symbol
+	ownedStock.Dividend += (line.Amount + tax)
+
+	// Initialize Dividends slice if it's nil
+	if ownedStock.Dividends == nil {
+		ownedStock.Dividends = []data.DividendData{}
+	}
+
+	ownedStock.Dividends = append(ownedStock.Dividends, dividendData)
+	(*result)[line.Symbol] = ownedStock
 }
 
 func CookiesToWlist(cookie string) []data.Stock {

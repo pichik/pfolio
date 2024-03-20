@@ -44,6 +44,9 @@ async function CreateStockTables() {
 
         CreateTable(allPfolio)
         UpdateData(allPfolio)
+        CreateHistory(allPfolio)
+        //Hide by default, need to be used here, after data loads, otherwise it weirdly stretches
+        document.getElementById('months').style.display = 'none';
 
         if(wList != null){
             CreateWatchlistTable(wList)
@@ -65,6 +68,7 @@ async function UpdateStockData() {
         const wList = data.wList;
 
         UpdateData(allPfolio)
+        CreateHistory(allPfolio)
 
         if(wList != null){
             UpdateWatchlist(wList)

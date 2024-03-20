@@ -33,6 +33,23 @@ function ChangePfolioCurrency(stocks) {
                         }
                     }
                 }
+                if (stock.Stock.DailyPrices) {
+                    for (const timestamp in stock.Stock.DailyPrices) {
+                        if (Object.hasOwnProperty.call(stock.Stock.DailyPrices, timestamp)) {
+                            stock.Stock.DailyPrices[timestamp] *= EurToUsd;
+                        }
+                    }
+                }
+                if (stock.Purchases) {
+                    for (const k in stock.Purchases) {
+                        stock.Purchases[k].Price *= EurToUsd;
+                    }
+                }
+                if (stock.Dividends) {
+                    for (const k in stock.Dividends) {
+                        stock.Dividends[k].TaxedPayout *= EurToUsd;
+                    }
+                }
             }
 
         });
@@ -50,6 +67,23 @@ function ChangePfolioCurrency(stocks) {
                         if (Object.hasOwnProperty.call(stock.Stock.HourlyPrices, timestamp)) {
                             stock.Stock.HourlyPrices[timestamp] *= UsdToEur;
                         }
+                    }
+                }
+                if (stock.Stock.DailyPrices) {
+                    for (const timestamp in stock.Stock.DailyPrices) {
+                        if (Object.hasOwnProperty.call(stock.Stock.DailyPrices, timestamp)) {
+                            stock.Stock.DailyPrices[timestamp] *= UsdToEur;
+                        }
+                    }
+                }
+                if (stock.Purchases) {
+                    for (const k in stock.Purchases) {
+                        stock.Purchases[k].Price *= UsdToEur;
+                    }
+                }
+                if (stock.Dividends) {
+                    for (const k in stock.Dividends) {
+                        stock.Dividends[k].TaxedPayout *= UsdToEur;
                     }
                 }
             }
@@ -74,6 +108,13 @@ function SynchroniseEurPfolio(stocks){
                 for (const timestamp in stock.Stock.HourlyPrices) {
                     if (Object.hasOwnProperty.call(stock.Stock.HourlyPrices, timestamp)) {
                         stock.Stock.HourlyPrices[timestamp] *= UsdToEur;
+                    }
+                }
+            }
+            if (stock.Stock.DailyPrices) {
+                for (const timestamp in stock.Stock.DailyPrices) {
+                    if (Object.hasOwnProperty.call(stock.Stock.DailyPrices, timestamp)) {
+                        stock.Stock.DailyPrices[timestamp] *= UsdToEur;
                     }
                 }
             }

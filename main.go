@@ -8,6 +8,7 @@ import (
 
 	"github.com/pichik/pfolio/src/auth"
 	"github.com/pichik/pfolio/src/data"
+	"github.com/pichik/pfolio/src/database"
 	"github.com/pichik/pfolio/src/misc"
 	request "github.com/pichik/pfolio/src/requests"
 
@@ -58,7 +59,7 @@ func login(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 
 func main() {
 	loadFiles()
-	request.Opendb(data.DataDir + "stockdata.db")
+	database.Opendb(data.DataDir)
 	go UpdateStocks()
 
 	r := mux.NewRouter()
@@ -86,6 +87,7 @@ func setupDataRoutes(r *mux.Router) {
 	dataRoutes.HandleFunc("/import-xtb", request.ImportXTB).Methods("POST")
 	dataRoutes.HandleFunc("/add-to-wlist", request.ImportWlist).Methods("POST")
 	dataRoutes.HandleFunc("/stock-update", request.StocksUpdate).Methods("GET")
+	dataRoutes.HandleFunc("/login", auth.Login).Methods("GET")
 
 	r.PathPrefix("/").Handler(negroni.New(
 		negroni.HandlerFunc(checkAuth),
@@ -120,7 +122,7 @@ func UpdateStocks() {
 	for {
 		select {
 		case <-ticker30Sec.C:
-			request.ReadDatabase()
+			database.ReadDatabase()
 
 		case <-ticker24Hours.C:
 			request.UpdateEchangeRates()

@@ -26,12 +26,16 @@
         method: 'POST',
         body: formData,
       })
+      .then(response => {
+        // Reload the page after the response is received
+        location.reload();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
     } else {
       console.error('No file selected.');
     }
-
-    // Reloads the current page
-    location.reload();
   }
 
   function importWlistStocks(){
@@ -52,5 +56,6 @@
         body: formData,
       })
     } 
+    document.getElementById("wlist-stock").value = "";
   }
 

@@ -1,9 +1,15 @@
 
 
 
-document.getElementById("searchTable").addEventListener("input", function() {
+  //Regex search
+  document.getElementById("searchTable").addEventListener("input", function() {
     var filter = this.value.toLowerCase(); // Convert input value to lowercase for case-insensitive matching
-    var tableRows = document.getElementById(currentSection == Sections.Pfolio ? 'pfolioTable':'wlistTable').getElementsByTagName("tr");
+    var regex = new RegExp(filter, 'i'); // Create a case-insensitive regular expression using the input value
+    regexSearch(regex);
+});
+
+function regexSearch(regex){
+  var tableRows = document.getElementById(currentSection == Sections.Pfolio ? 'pfolioTable':'wlistTable').getElementsByTagName("tr");
   
     // Loop through all table rows
     for (var i = 0; i < tableRows.length; i++) {
@@ -13,15 +19,16 @@ document.getElementById("searchTable").addEventListener("input", function() {
       if (firstColumn) {
         var textContent = firstColumn.textContent.toLowerCase(); // Get text content of the first column
   
-        // If the text content contains the search query, show the row, otherwise hide it
-        if (textContent.indexOf(filter) > -1) {
+        // Use the regular expression to test if the text content matches the filter
+        if (regex.test(textContent)) {
           row.style.display = "";
         } else {
           row.style.display = "none";
         }
       }
     }
-  });
+}
+
   
 
 

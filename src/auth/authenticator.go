@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/pichik/pfolio/src/data"
+	"github.com/pichik/pfolio/src/database"
 )
 
 var AdminPanel = "/admin"
@@ -42,4 +43,19 @@ func Authenticate(w http.ResponseWriter, r *http.Request, next http.HandlerFunc)
 		return
 	}
 	next(w, r)
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Get("username") != "" {
+		cookie := &http.Cookie{
+			Name:     "username",
+			Value:    r.URL.Query().Get("username"),
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			Expires:  time.Now().Add(365 * 24 * time.Hour),
+		}
+		http.SetCookie(w, cookie)
+		http.Redirect(w, r, "/", http.StatusFound)
+		database.CreateUser(r.URL.Query().Get("username"))
+	}
 }

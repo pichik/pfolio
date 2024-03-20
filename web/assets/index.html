@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/moment/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
 <script src="/updates/pfolio.js"></script>
+<script src="/months.js"></script>
 <script src="/updates/watchlist.js"></script>
 <script src="/requests/update.js"></script>
 <script src="/requests/import.js"></script>
@@ -47,13 +48,17 @@
     <canvas id="barchart-total"  height="500"  style="width: 100%;" ></canvas>
     <br>
     <br>
-    <div class="center-button">
+    <div class="center-button" style="width: 100%;">
       <div id="wlist-inputs" style="visibility:hidden;">
         <input id="wlist-stock" type="text" style="display: inline-block;">
-        <button onclick="importWlistStocks()" style="display: inline-block;padding:5px 10px">Add to Watchlist</button>
+        <button onclick="importWlistStocks()" style="display: inline-block;padding:5px 20px">Add to Watchlist</button>
       </div>
-      <button id="sectionSwitcher" onclick="SwitchSections()" style="display: block;margin: 10px;">Portfolio</button>
-      <input class="center-button" type="text" id="searchTable" placeholder="Search ticker..." style="width: 40%;margin-bottom: 10px;">
+      <span>
+      <button  onclick="SwitchSections(Sections.Pfolio)" style="margin: 5px;width: 300px">Portfolio</button>
+      <button  onclick="SwitchSections(Sections.Wlist)" style="margin: 5px;width: 300px">Watchlist</button>
+      <button  onclick="SwitchSections(Sections.Months)" style="margin: 5px;width: 300px">Monthly Results</button>
+      </span>
+      <input class="center-button" type="text" id="searchTable" placeholder="Search ticker..." style="width: 10%;margin-bottom: 10px;">
     </div>
     <div class="container">
       <div id="pfolio" style="width: 100%;">
@@ -87,6 +92,55 @@
               </tr>
             </thead>
             <tbody id="watchlistTable">
+            </tbody>
+        </table>
+      </div>
+      <div id="months" style="width: 100%">
+        <h1 style="text-align: center;">Dividends</h1>
+        <table  style="width: 100%;text-align: center;">
+            <thead style="color:yellow">
+              <tr>
+                <th> </th> <!-- Empty header for spacing -->
+                <th>Jan</th>
+                <th>Feb</th>
+                <th>Mar</th>
+                <th>Apr</th>
+                <th>May</th>
+                <th>Jun</th>
+                <th>Jul</th>
+                <th>Aug</th>
+                <th>Sep</th>
+                <th>Oct</th>
+                <th>Nov</th>
+                <th>Dec</th>
+                <th>Yearly</th>
+              </tr>
+            </thead>
+            <tbody id="dividendMonthsTable">
+            </tbody>
+        </table>
+        <br><br>
+        <h1 style="text-align: center;">Purchases</h1>
+        <table style="width: 100%;text-align: center;">
+            <thead style="color:yellow">
+              <tr>
+                <th> </th> <!-- Empty header for spacing -->
+                <th>Jan</th>
+                <th>Feb</th>
+                <th>Mar</th>
+                <th>Apr</th>
+                <th>May</th>
+                <th>Jun</th>
+                <th>Jul</th>
+                <th>Aug</th>
+                <th>Sep</th>
+                <th>Oct</th>
+                <th>Nov</th>
+                <th>Dec</th>
+                <th>Yearly</th>
+              </tr>
+            </thead>
+            <tbody id="purchasesMonthsTable">
             </tbody>
         </table>
       </div>

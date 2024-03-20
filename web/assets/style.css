@@ -4,14 +4,14 @@ body {
 font-family: 'Roboto Mono', monospace;
 background-color: #180F18;
 color: #fff;
-font-size: 18px;
+font-size: 22px;
 }
 input, textarea, button, select {
 font-family: 'Roboto Mono', monospace;
 background-color: #372337;
 border-radius: 6px;
 color: #fff;
-font-size:18px;
+font-size:22px;
 
 }
 input,button,select{

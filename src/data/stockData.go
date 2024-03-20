@@ -1,14 +1,5 @@
 package data
 
-type XTBStockData struct {
-	ID      string  `json:"ID"`
-	Type    string  `json:"Type"`
-	Time    string  `json:"Time"`
-	Symbol  string  `json:"Symbol"`
-	Comment string  `json:"Comment"`
-	Amount  float64 `json:"Amount"`
-}
-
 type Stock struct {
 	Ticker             string
 	LastPrice          float64
@@ -26,4 +17,18 @@ type OwnedStock struct {
 	BuyAmount float64
 	BuyPrice  float64
 	Dividend  float64
+	Purchases []PurchaseData
+	Dividends []DividendData
+}
+
+type PurchaseData struct {
+	Timestamp int64
+	Quantity  float64
+	Price     float64
+}
+type DividendData struct {
+	Timestamp   int64
+	Payout      float64
+	Tax         float64
+	TaxedPayout float64
 }

@@ -1,14 +1,13 @@
 package request
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strconv"
-	"strings"
+	"time"
 
 	"github.com/pichik/pfolio/src/data"
-	"github.com/pichik/pfolio/src/misc"
+	"github.com/pichik/pfolio/src/database"
 )
 
 func ImportXTB(w http.ResponseWriter, r *http.Request) {
@@ -30,125 +29,39 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// Read the file content
-	body, err := io.ReadAll(file)
+	xtbcsv, err := data.ProcessCSVFile(file)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Error reading file content: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Error processing csv file: %v", err), http.StatusInternalServerError)
 		return
 	}
-
-	csvData := string(body)
-
-	tck, pf := GetPortfolio(csvData)
-
-	sendTickers(tck)
-
-	cookie := &http.Cookie{
-		Name:   "XTB-" + currency,
-		Value:  pf,
-		MaxAge: 365 * 24 * 60 * 60, // 1 year in seconds
+	xtb_usdJSON, err := json.Marshal(xtbcsv)
+	if err != nil {
+		fmt.Println("Error marshaling XTB_USD to JSON:", err)
+		return
 	}
-	// Set the cookie in the response
-	http.SetCookie(w, cookie)
+	username, err := r.Cookie("username")
+	if err != nil {
+		fmt.Println("Cookie not found:", err)
+		return
+	}
+	database.AddPfolio(username.Value, xtb_usdJSON, currency)
+
 	w.WriteHeader(http.StatusOK)
 }
 
-func GetPortfolio(input string) (string, string) {
-	lines := strings.Split(input, "\n")
-	result := make(map[string]data.OwnedStock)
+func getTimeStamp(timeStr string) int64 {
+	// Define the layout for the input string
+	layout := "02.01.2006 15:04:05"
 
-	for _, line := range lines {
-
-		ownedStockData := data.OwnedStock{}
-
-		if strings.Contains(line, "OPEN") {
-			fields := strings.Split(line, ";")
-			// time := fields[0]
-			ticker := fields[3]
-			priceStr := strings.Split(fields[4], " ")[4]
-
-			quantityStr := strings.Split(strings.Split(fields[4], " ")[2], "/")[0]
-
-			quantity, err := strconv.ParseFloat(quantityStr, 64)
-			if err != nil {
-				misc.ErrorLog.Printf("Error quantity parsing:  %s", err)
-				continue
-			}
-			price, err := strconv.ParseFloat(priceStr, 64)
-			if err != nil {
-				misc.ErrorLog.Printf("Error amount parsing:  %s", err)
-				continue
-			}
-
-			//calculate average price if there is higher quantity
-			if val, ok := result[ticker]; ok {
-				ownedStockData.BuyAmount = val.BuyAmount + quantity
-				ownedStockData.BuyPrice = ((val.BuyAmount * val.BuyPrice) + (quantity * price)) / (val.BuyAmount + quantity)
-				ownedStockData.Dividend = val.Dividend
-
-			} else {
-				ownedStockData.BuyAmount = quantity
-				ownedStockData.BuyPrice = price
-			}
-			result[ticker] = ownedStockData
-
-		} else if strings.Contains(line, "Dividend") {
-			fields := strings.Split(line, ";")
-			ticker := fields[3]
-
-			dividendStr := fields[5]
-
-			dividend, err := strconv.ParseFloat(strings.TrimSuffix(dividendStr, "\r"), 64)
-			if err != nil {
-				misc.ErrorLog.Printf("Error dividend parsing:  %s", err)
-				continue
-			}
-			if val, ok := result[ticker]; ok {
-
-				ownedStockData.BuyAmount = val.BuyAmount
-				ownedStockData.BuyPrice = val.BuyPrice
-				ownedStockData.Dividend = val.Dividend + dividend
-
-			} else {
-				ownedStockData.Dividend = dividend
-			}
-			result[ticker] = ownedStockData
-		}
+	// Parse the input string into a time.Time object
+	t, err := time.Parse(layout, timeStr)
+	if err != nil {
+		fmt.Println("Error parsing time:", err)
+		return 0
 	}
 
-	var tck string
-	var ptf string
+	// Convert the time.Time object to a Unix timestamp (seconds since January 1, 1970 UTC)
+	timestamp := t.Unix()
 
-	for k, v := range result {
-		tck = tck + k + " "
-		ptf = ptf + fmt.Sprintf("%s:%f:%f:%f/", k, v.BuyAmount, v.BuyPrice, v.Dividend)
-	}
-
-	return tck, ptf
+	return timestamp
 }
-
-// func CheckClosedStocks(lines []string) {
-
-// 	for _, line := range lines {
-// 		if strings.Contains(line, "CLOSED") {
-// 			fields := strings.Split(line, ";")
-// 			// time := fields[0]
-// 			ticker := fields[3]
-// 			priceStr := strings.Split(fields[4], " ")[4]
-
-// 			quantityStr := strings.Split(strings.Split(fields[4], " ")[2], "/")[0]
-
-// 			quantity, err := strconv.ParseFloat(quantityStr, 64)
-// 			if err != nil {
-// 				misc.ErrorLog.Printf("Error quantity parsing:  %s", err)
-// 				continue
-// 			}
-// 			price, err := strconv.ParseFloat(priceStr, 64)
-// 			if err != nil {
-// 				misc.ErrorLog.Printf("Error amount parsing:  %s", err)
-// 				continue
-// 			}
-// 		}
-// 	}
-
-// }
