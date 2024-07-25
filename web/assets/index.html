@@ -45,6 +45,7 @@
       </div>
     </div>
     <canvas id="piechart-total"  height="500" style="display: block; margin: -100px auto;"></canvas>
+    <br>
     <canvas id="barchart-total"  height="500"  style="width: 100%;" ></canvas>
     <br>
     <br>
@@ -56,7 +57,7 @@
       <span>
       <button  onclick="SwitchSections(Sections.Pfolio)" style="margin: 5px;width: 300px">Portfolio</button>
       <button  onclick="SwitchSections(Sections.Wlist)" style="margin: 5px;width: 300px">Watchlist</button>
-      <button  onclick="SwitchSections(Sections.Months)" style="margin: 5px;width: 300px">Monthly Results</button>
+      <button  onclick="SwitchSections(Sections.Months)" style="margin: 5px;width: 300px">Monthly Stats</button>
       </span>
       <input class="center-button" type="text" id="searchTable" placeholder="Search ticker..." style="width: 10%;margin-bottom: 10px;">
     </div>
@@ -96,8 +97,10 @@
         </table>
       </div>
       <div id="months" style="width: 100%">
-        <h1 style="text-align: center;">Dividends</h1>
-        <table  style="width: 100%;text-align: center;">
+        <h1 style="text-align: center;color: orange;">Dividends</h1>
+        <canvas id="barchart-monthly-dividends"  height="500"  style="width: 100%;" ></canvas>
+        <br><hr style="border-color:#180F18"><br>
+        <table  class="monthlyTable">
             <thead style="color:yellow">
               <tr>
                 <th> </th> <!-- Empty header for spacing -->
@@ -119,9 +122,34 @@
             <tbody id="dividendMonthsTable">
             </tbody>
         </table>
+        <br><hr style="border-color:#180F18"><br>
+          <table  class="monthlyTable" >
+          <thead style="color:yellow">
+            <tr>
+              <th> </th> <!-- Empty header for spacing -->
+              <th>Jan</th>
+              <th>Feb</th>
+              <th>Mar</th>
+              <th>Apr</th>
+              <th>May</th>
+              <th>Jun</th>
+              <th>Jul</th>
+              <th>Aug</th>
+              <th>Sep</th>
+              <th>Oct</th>
+              <th>Nov</th>
+              <th>Dec</th>
+              <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody id="dividendMonthsTickerTable">
+          </tbody>
+      </table>
         <br><br>
-        <h1 style="text-align: center;">Purchases</h1>
-        <table style="width: 100%;text-align: center;">
+        <h1 style="text-align: center;color: orange;">Purchases</h1>
+        <canvas id="barchart-monthly-purchases"  height="500"  style="width: 100%;" ></canvas>
+        <br><hr style="border-color:#180F18"><br>
+        <table class="monthlyTable">
             <thead style="color:yellow">
               <tr>
                 <th> </th> <!-- Empty header for spacing -->

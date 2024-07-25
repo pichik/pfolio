@@ -12,8 +12,15 @@ var UsdToEur float64
 var EurToUsd float64
 
 func UpdateEchangeRates() {
-	UsdToEur = getExchangeRates("USD", "EUR")
-	EurToUsd = getExchangeRates("EUR", "USD")
+	new := getExchangeRates("USD", "EUR")
+	if new != 0 {
+		UsdToEur = new
+	}
+	new = getExchangeRates("EUR", "USD")
+	if new != 0 {
+		EurToUsd = new
+	}
+
 }
 
 func getExchangeRates(from string, to string) float64 {
@@ -25,12 +32,6 @@ func getExchangeRates(from string, to string) float64 {
 	body, _ := io.ReadAll(res.Body)
 
 	exchange := getExchange(string(body))
-
-	if exchange == 0 {
-		return 0
-	}
-
-	// timestamp := int(time.Now().Unix() * 1000)
 
 	return exchange
 }

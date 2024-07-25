@@ -38,6 +38,12 @@ function createLineChart(canvasId, data) {
                   label += '[ '+moment(context.raw.x).format('DD.MM HH:mm')+' ]';
                 return label;
               }
+            },
+            titleFont: {
+              size: 24, 
+            },
+            bodyFont: {
+              size: 18, 
             }
           }
         },
@@ -89,6 +95,12 @@ function createPieChart(canvasId, data){
                   }
                   return label;
               }
+            },
+            titleFont: {
+              size: 24, 
+            },
+            bodyFont: {
+              size: 18, 
             }
           },
           legend: {
@@ -124,11 +136,20 @@ function createBarChart(canvasId, data){
       responsive: false, // Prevent chart from resizing
       plugins: {
         tooltip:{
-          displayColors:false
+          displayColors:false,
+          titleFont: {
+            size: 24, 
+          },
+          bodyFont: {
+            size: 18, 
+          }
         },
         title: {
           display: true,
-          text: 'Invested / Profit'
+          text: 'Invested / Profit',
+          font: {
+            size: 16
+          }
         },
       },
       scales: {
@@ -142,5 +163,154 @@ function createBarChart(canvasId, data){
     },
   });
 }
+
+
+function createMonthlyDividendBarChart(canvasId, data) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+    
+  // Extract years and months from the accumulated dividends object
+  const years = Object.keys(data);
+  const months = Object.keys(data[years[0]]); // Assuming all years have the same months
+
+  // Prepare labels and dataset values
+  const labels = [];
+  const dividendData = [];
+
+  // Iterate over years and months to populate labels and dividend data
+  years.forEach(year => {
+    months.forEach(month => {
+      if (data[year][month][1] > 0) {
+        labels.push(`${month}/${year}`); // Format: Month/Year
+        dividendData.push(data[year][month][1]); // Accumulated dividends for the month
+      }
+    });
+  });
+  
+    // Create the bar chart
+    const myBarChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Dividends',
+          backgroundColor: 'rgba(0,150,150,0.5)',
+          data: dividendData
+        }]
+      },
+      options: {
+        responsive: false, // Prevent chart from resizing
+        plugins: {
+          tooltip: {
+            displayColors: false,
+            titleFont: {
+              size: 24, 
+            },
+            bodyFont: {
+              size: 18, 
+            }
+          },
+          title: {
+            display: true,
+            text: 'Monthly Dividends',
+            font: {
+              size: 16
+            }
+          },
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            stacked: true,
+          },
+          y: {
+            stacked: true
+          }
+        },
+        categoryPercentage: 0.5,
+      }
+    });
+  }
+
+  function createMonthlyPurchaseBarChart(canvasId, data) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+      
+    // Extract years and months from the accumulated dividends object
+    const years = Object.keys(data);
+    const months = Object.keys(data[years[0]]); // Assuming all years have the same months
+  
+    // Prepare labels and dataset values
+    const labels = [];
+    const purchaseData = [];
+    const purchaseDataTotal = [];
+  
+    // Iterate over years and months to populate labels and dividend data
+    let accumulatedPurchases = 0;
+    years.forEach(year => {
+        months.forEach((month, index) => {
+        if(month == "all" || data[year][month] == 0){
+          return;
+        }
+        // Add the accumulated purchases to the current month's purchases
+        labels.push(`${month}/${year}`); // Format: Month/Year
+        purchaseData.push(data[year][month]); // Accumulated purchases for the month
+        purchaseDataTotal.push(accumulatedPurchases); // Accumulated purchases for the month
+        accumulatedPurchases += data[year][month];
+      });
+    });
+    
+      // Create the bar chart
+      const myBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total',
+            backgroundColor: 'rgba(0,150,150,0.5)',
+            data: purchaseDataTotal
+          },{
+            label: 'Monthly',
+            backgroundColor: 'rgba(0,255,0,0.2)',
+            data: purchaseData
+          }]
+        },
+        options: {
+          responsive: false, // Prevent chart from resizing
+          plugins: {
+            tooltip: {
+              displayColors: false,
+              titleFont: {
+                size: 24, 
+              },
+              bodyFont: {
+                size: 18, 
+              }
+            },
+            title: {
+              display: true,
+              text: 'Monthly Investment Growth',
+              font: {
+                size: 16
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+            },
+            y: {
+              stacked: true
+            }
+          },
+          categoryPercentage: 0.5,
+        }
+      });
+    }
+  
+  
 
 

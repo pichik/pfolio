@@ -14,7 +14,7 @@
           const buyPrice=parseFloat(stock.BuyPrice.toFixed(2));
           const dividend=parseFloat(stock.Dividend.toFixed(2));
           const lastPrice=parseFloat(stock.Stock.LastPrice.toFixed(2));
-          const stockOwn=stock.BuyAmount;
+          const stockOwn=parseFloat((stock.BuyAmount).toFixed(2));
           const invested=parseFloat((stock.BuyPrice*stock.BuyAmount).toFixed(2));
          
 

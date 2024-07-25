@@ -68,7 +68,6 @@ async function UpdateStockData() {
         const wList = data.wList;
 
         UpdateData(allPfolio)
-        CreateHistory(allPfolio)
 
         if(wList != null){
             UpdateWatchlist(wList)

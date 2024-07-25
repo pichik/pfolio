@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/pichik/pfolio/src/misc"
 )
 
 var home, _ = os.UserHomeDir()
@@ -41,8 +43,9 @@ func init() {
 
 	TemplateDir = Config.Directory + "/templates/"
 	AssetsDir = Config.Directory + "/assets/"
-	LogsDir = Config.Directory + "/logs/"
 	DataDir = Config.Directory + "/data/"
 	CertDir = Config.Directory + "/certs/"
 
+	LogsDir = Config.Directory + "/logs/"
+	misc.LogDir(LogsDir)
 }

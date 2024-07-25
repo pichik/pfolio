@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
+	"strings"
 
 	"github.com/pichik/pfolio/src/data"
 	"github.com/pichik/pfolio/src/database"
@@ -34,9 +34,9 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error processing csv file: %v", err), http.StatusInternalServerError)
 		return
 	}
-	xtb_usdJSON, err := json.Marshal(xtbcsv)
+	xtbJSON, err := json.Marshal(xtbcsv)
 	if err != nil {
-		fmt.Println("Error marshaling XTB_USD to JSON:", err)
+		fmt.Println("Error marshaling XTB to JSON:", err)
 		return
 	}
 	username, err := r.Cookie("username")
@@ -44,24 +44,37 @@ func ImportXTB(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Cookie not found:", err)
 		return
 	}
-	database.AddPfolio(username.Value, xtb_usdJSON, currency)
+	database.AddPfolio(username.Value, xtbJSON, currency)
+
+	// Send tickers to spdr for processing
+	seen := make(map[string]struct{})
+	var importedTickers strings.Builder
+
+	for _, line := range xtbcsv {
+		if _, ok := seen[line.Symbol]; !ok {
+			// If symbol not seen before, add to set and append to builder
+			seen[line.Symbol] = struct{}{}
+			importedTickers.WriteString(line.Symbol + " ")
+		}
+	}
+	sendTickers(strings.TrimSpace(importedTickers.String()))
 
 	w.WriteHeader(http.StatusOK)
 }
 
-func getTimeStamp(timeStr string) int64 {
-	// Define the layout for the input string
-	layout := "02.01.2006 15:04:05"
+// func getTimeStamp(timeStr string) int64 {
+// 	// Define the layout for the input string
+// 	layout := "02.01.2006 15:04:05"
 
-	// Parse the input string into a time.Time object
-	t, err := time.Parse(layout, timeStr)
-	if err != nil {
-		fmt.Println("Error parsing time:", err)
-		return 0
-	}
+// 	// Parse the input string into a time.Time object
+// 	t, err := time.Parse(layout, timeStr)
+// 	if err != nil {
+// 		fmt.Println("Error parsing time:", err)
+// 		return 0
+// 	}
 
-	// Convert the time.Time object to a Unix timestamp (seconds since January 1, 1970 UTC)
-	timestamp := t.Unix()
+// 	// Convert the time.Time object to a Unix timestamp (seconds since January 1, 1970 UTC)
+// 	timestamp := t.Unix()
 
-	return timestamp
-}
+// 	return timestamp
+// }
